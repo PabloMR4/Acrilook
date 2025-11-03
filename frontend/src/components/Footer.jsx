@@ -8,13 +8,13 @@ const Footer = () => {
         {/* Logo y descripción */}
         <div className="footer-section footer-brand">
           <div className="footer-logo">
-            <span className="logo-icon">👟</span>
-            <h2 className="logo-text">ShoeLandia</h2>
+            <span className="logo-icon">✨</span>
+            <h2 className="logo-text">AcriLook</h2>
           </div>
-          <p className="footer-tagline">Tu Web de Zapatillas/Sneakers Online al mejor precio</p>
+          <p className="footer-tagline">Tu tienda de Productos Acrílicos Online al mejor precio</p>
           <p className="footer-description">
-            Descubre la mejor selección de calzado premium para cada ocasión.
-            Estilo, comodidad y calidad en cada paso.
+            Descubre la mejor selección de productos acrílicos premium para decoración y organización.
+            Elegancia, funcionalidad y diseño en cada pieza.
           </p>
           <div className="footer-social">
             <a href="#" className="social-link" aria-label="Instagram">
@@ -38,7 +38,7 @@ const Footer = () => {
           <ul className="footer-list">
             <li>
               <span className="footer-icon">📧</span>
-              <a href="mailto:info@shoelandia.com">info@shoelandia.com</a>
+              <a href="mailto:info@acrilook.com">info@acrilook.com</a>
             </li>
           </ul>
         </div>
@@ -74,7 +74,7 @@ const Footer = () => {
       {/* Bottom footer */}
       <div className="footer-bottom">
         <p className="footer-copyright">
-          © 2024 ShoeLandia. Todos los derechos reservados.
+          © 2024 AcriLook. Todos los derechos reservados.
         </p>
         <div className="footer-payments">
           <span className="payment-icon">💳</span>

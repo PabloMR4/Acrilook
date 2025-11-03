@@ -145,9 +145,9 @@ ${genero ? `Género: ${genero}` : ''}
 📦 Envíos a todo el país / 🚚 Entrega rápida en 24h
 👇 ¡Consíguelas ya!
 
-Web: https://www.Shoelandia.es
+Web: https://www.acrilook.com
 
-#Zapatillas #Sneakers #Tendencia #ModaUrbana #StreetStyle #OutfitDelDía #Streetwear #Moda2025 #SneakerAddict #SneakerLovers`;
+#Acrilico #Decoracion #Tendencia #DiseñoModerno #Organizacion #HomeDecor #Interiorismo #Deco2025 #AcryliLovers #DecoAcrilica`;
 
         console.log('📝 Caption generado:', caption);
         console.log('📝 textoCaption:', textoCaption);

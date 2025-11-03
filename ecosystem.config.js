@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'shoelandia-backend',
+      name: 'acrilook-backend',
       cwd: './backend',
       script: 'server.js',
       instances: 1,
@@ -18,7 +18,7 @@ module.exports = {
       merge_logs: true
     },
     {
-      name: 'shoelandia-frontend',
+      name: 'acrilook-frontend',
       cwd: './frontend',
       script: 'npx',
       args: 'vite preview --host 0.0.0.0 --port 5173',

@@ -1,7 +1,7 @@
 {
-  "name": "moda-backend",
+  "name": "acrilook-backend",
   "version": "1.0.0",
-  "description": "Backend para tienda de moda",
+  "description": "Backend para tienda de productos acrílicos",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

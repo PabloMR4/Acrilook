@@ -96,13 +96,13 @@ console.log('='.repeat(60));
 // Probar con CSV de tallas separadas
 console.log('\n1️⃣  PROBANDO: productos_tallas_separadas.csv');
 console.log('='.repeat(60));
-const csv1 = parseCSV('/root/Shoelandia/productos_tallas_separadas.csv');
+const csv1 = parseCSV('/root/AcriLook/productos_tallas_separadas.csv');
 const resultado1 = simularImportacion(csv1);
 
 // Probar con CSV de múltiples filas
 console.log('\n2️⃣  PROBANDO: productos_multiples_filas.csv');
 console.log('='.repeat(60));
-const csv2 = parseCSV('/root/Shoelandia/productos_multiples_filas.csv');
+const csv2 = parseCSV('/root/AcriLook/productos_multiples_filas.csv');
 const resultado2 = simularImportacion(csv2);
 
 console.log('\n✅ PRUEBA COMPLETADA');

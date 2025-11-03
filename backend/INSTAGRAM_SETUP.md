@@ -1,6 +1,6 @@
 # 📷 Configuración de Instagram para Publicaciones Automáticas
 
-Esta guía te ayudará a configurar la integración con Instagram para publicar productos directamente desde el panel administrativo de Shoelandia.
+Esta guía te ayudará a configurar la integración con Instagram para publicar productos directamente desde el panel administrativo de AcriLook.
 
 ## 📋 Requisitos Previos
 
@@ -34,7 +34,7 @@ Esta guía te ayudará a configurar la integración con Instagram para publicar 
 2. Inicia sesión con tu cuenta de Facebook
 3. Haz clic en **Mis Apps** → **Crear App**
 4. Selecciona el tipo **Empresa** (Business)
-5. Dale un nombre a tu app (ej: "Shoelandia Marketing")
+5. Dale un nombre a tu app (ej: "AcriLook Marketing")
 6. Añade un email de contacto
 7. Haz clic en **Crear App**
 
@@ -111,14 +111,14 @@ INSTAGRAM_ACCOUNT_ID=tu_instagram_business_account_id_aqui
 ### Paso 8: Reiniciar el Servidor
 
 ```bash
-pm2 restart shoelandia-backend
+pm2 restart acrilook-backend
 ```
 
 ---
 
 ## ✅ Verificar que Funciona
 
-1. Accede al panel administrativo: `https://shoelandia.es/admin`
+1. Accede al panel administrativo: `https://acrilook.es/admin`
 2. Ve a **Marketing** → **Marketing RRSS**
 3. Selecciona un producto
 4. Haz clic en **Compartir**
@@ -196,5 +196,5 @@ pm2 restart shoelandia-backend
 
 Si tienes problemas con la configuración, revisa los logs del servidor:
 ```bash
-pm2 logs shoelandia-backend
+pm2 logs acrilook-backend
 ```

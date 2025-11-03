@@ -1,10 +1,10 @@
-# 👟 Shoelandia - E-commerce de Zapatillas
+# ✨ AcriLook - E-commerce de Productos Acrílicos
 
-Una tienda online completa y profesional para la venta de zapatillas, con un frontend moderno en React y un backend robusto en Node.js. Diseñada con todas las funcionalidades necesarias para un e-commerce real en producción.
+Una tienda online completa y profesional para la venta de productos acrílicos y decoración, con un frontend moderno en React y un backend robusto en Node.js. Diseñada con todas las funcionalidades necesarias para un e-commerce real en producción.
 
 ## 🌐 Demo en Vivo
 
-**URL:** [https://shoelandia.es](https://shoelandia.es)
+**URL:** [https://acrilook.com](https://acrilook.com)
 
 ## ✨ Características Principales
 
@@ -84,7 +84,7 @@ Acceso en `/admin` o `/dashboard` con credenciales:
 ## 🏗️ Arquitectura del Proyecto
 
 ```
-Tienda-Zapatillas/
+Acrilook/
 ├── backend/
 │   ├── server.js              # Servidor Express principal
 │   ├── dashboard.html         # Panel de administración
@@ -154,8 +154,8 @@ Tienda-Zapatillas/
 ### 1. Clonar el Repositorio
 
 ```bash
-git clone https://github.com/PabloMR4/Tienda-Zapatillas.git
-cd Tienda-Zapatillas
+git clone https://github.com/PabloMR4/Acrilook.git
+cd Acrilook
 ```
 
 ### 2. Configurar Backend
@@ -224,11 +224,11 @@ npm run build
 
 # Iniciar backend con PM2
 cd ../backend
-pm2 start server.js --name shoelandia-backend
+pm2 start server.js --name acrilook-backend
 
 # Iniciar preview del frontend con PM2
 cd ../frontend
-pm2 start "npm run preview" --name shoelandia-frontend
+pm2 start "npm run preview" --name acrilook-frontend
 
 # Guardar configuración
 pm2 save
@@ -485,7 +485,7 @@ Crea uno desde el registro o en el panel admin
 
 ## 📈 Estado del Proyecto
 
-✅ **Funcional en Producción:** [https://shoelandia.es](https://shoelandia.es)
+✅ **Funcional en Producción:** [https://acrilook.com](https://acrilook.com)
 
 ### Características Implementadas
 - [x] Sistema completo de e-commerce
@@ -531,7 +531,7 @@ Crea uno desde el registro o en el panel admin
 ```bash
 cd backend
 node reset-counters.js
-pm2 restart shoelandia-backend
+pm2 restart acrilook-backend
 ```
 
 ## 📄 Licencia
@@ -542,7 +542,7 @@ MIT License - Siéntete libre de usar este proyecto para tus propios fines.
 
 **Pablo MR**
 - GitHub: [@PabloMR4](https://github.com/PabloMR4)
-- Proyecto: Shoelandia E-commerce
+- Proyecto: AcriLook E-commerce
 - Año: 2024-2025
 
 ## 🤝 Contribuciones
@@ -559,17 +559,17 @@ Las contribuciones son bienvenidas. Por favor:
 Si tienes preguntas o necesitas ayuda:
 - Abre un issue en GitHub
 - Consulta la documentación de las APIs utilizadas
-- Revisa los logs del servidor: `pm2 logs shoelandia-backend`
+- Revisa los logs del servidor: `pm2 logs acrilook-backend`
 
 ## 🙏 Agradecimientos
 
 - Facebook/Meta por la Instagram Graph API
 - Stripe por su excelente API de pagos
 - La comunidad de React y Node.js
-- Todos los contribuidores y usuarios de Shoelandia
+- Todos los contribuidores y usuarios de AcriLook
 
 ---
 
 **Desarrollado con ❤️ usando React, Node.js y mucho café ☕**
 
-**Shoelandia © 2024-2025** - Tu tienda de zapatillas online
+**AcriLook © 2024-2025** - Tu tienda de productos acrílicos online

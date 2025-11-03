@@ -82,7 +82,7 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false, // true para 465, false para otros puertos
   auth: {
-    user: process.env.EMAIL_USER || 'info@shoelandia.es',
+    user: process.env.EMAIL_USER || 'info@acrilook.com',
     pass: process.env.EMAIL_PASSWORD || '' // Configurar en .env
   },
   tls: {
@@ -94,8 +94,8 @@ const transporter = nodemailer.createTransport({
 async function enviarEmailNuevoTicket(ticket) {
   try {
     const mailOptions = {
-      from: '"ShoeLandia Soporte" <info@shoelandia.es>',
-      to: 'info@shoelandia.es',
+      from: '"AcriLook Soporte" <info@acrilook.es>',
+      to: 'info@acrilook.es',
       subject: `Nuevo Ticket #${ticket.id} - ${ticket.asunto}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -131,8 +131,8 @@ async function enviarEmailNuevoTicket(ticket) {
 async function enviarEmailContacto(datos) {
   try {
     const mailOptions = {
-      from: '"ShoeLandia Web" <info@shoelandia.es>',
-      to: 'info@shoelandia.es',
+      from: '"AcriLook Web" <info@acrilook.es>',
+      to: 'info@acrilook.es',
       replyTo: datos.email,
       subject: `Contacto Web: ${datos.asunto}`,
       html: `
@@ -223,9 +223,9 @@ async function enviarEmailConfirmacionPedido(pedido) {
     }).join('');
 
     const mailOptions = {
-      from: '"ShoeLandia" <info@shoelandia.es>',
+      from: '"AcriLook" <info@acrilook.es>',
       to: pedido.cliente.email,
-      subject: `Confirmación de Pedido #${pedido.id} - ShoeLandia`,
+      subject: `Confirmación de Pedido #${pedido.id} - AcriLook`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -319,15 +319,15 @@ async function enviarEmailConfirmacionPedido(pedido) {
                   <tr>
                     <td style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e0e0e0;">
                       <p style="margin: 0 0 10px 0; color: #999; font-size: 14px;">
-                        Gracias por confiar en ShoeLandia
+                        Gracias por confiar en AcriLook
                       </p>
                       <p style="margin: 0; color: #999; font-size: 12px;">
-                        © ${new Date().getFullYear()} ShoeLandia. Todos los derechos reservados.
+                        © ${new Date().getFullYear()} AcriLook. Todos los derechos reservados.
                       </p>
                       <div style="margin-top: 20px;">
-                        <a href="https://shoelandia.es" style="color: #667eea; text-decoration: none; margin: 0 10px;">Visitar Tienda</a>
+                        <a href="https://acrilook.es" style="color: #667eea; text-decoration: none; margin: 0 10px;">Visitar Tienda</a>
                         <span style="color: #ddd;">|</span>
-                        <a href="https://shoelandia.es" style="color: #667eea; text-decoration: none; margin: 0 10px;">Contacto</a>
+                        <a href="https://acrilook.es" style="color: #667eea; text-decoration: none; margin: 0 10px;">Contacto</a>
                       </div>
                     </td>
                   </tr>
@@ -362,7 +362,7 @@ async function enviarEmailCambioEstado(pedido, estadoAnterior) {
     };
 
     const mailOptions = {
-      from: '"ShoeLandia" <info@shoelandia.es>',
+      from: '"AcriLook" <info@acrilook.es>',
       to: pedido.cliente.email,
       subject: `${iconoEstado} Actualización de Pedido #${pedido.id} - ${pedido.estado}`,
       html: `
@@ -428,7 +428,7 @@ async function enviarEmailCambioEstado(pedido, estadoAnterior) {
 
                       <!-- CTA -->
                       <div style="text-align: center; margin-top: 30px;">
-                        <a href="https://shoelandia.es" style="display: inline-block; background-color: #667eea; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
+                        <a href="https://acrilook.es" style="display: inline-block; background-color: #667eea; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
                           Ver mi Cuenta
                         </a>
                       </div>
@@ -442,7 +442,7 @@ async function enviarEmailCambioEstado(pedido, estadoAnterior) {
                         ¿Necesitas ayuda? Contáctanos en cualquier momento
                       </p>
                       <p style="margin: 0; color: #999; font-size: 12px;">
-                        © ${new Date().getFullYear()} ShoeLandia. Todos los derechos reservados.
+                        © ${new Date().getFullYear()} AcriLook. Todos los derechos reservados.
                       </p>
                     </td>
                   </tr>
@@ -2838,20 +2838,20 @@ app.post('/api/marketing/enviar-email', requireAuth, async (req, res) => {
     const resultados = await Promise.allSettled(
       destinatarios.map(async (email) => {
         const mailOptions = {
-          from: '"ShoeLandia" <info@shoelandia.es>',
+          from: '"AcriLook" <info@acrilook.es>',
           to: email,
           subject: asunto,
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f0e8;">
               <div style="background: white; padding: 30px; border-radius: 10px;">
-                <h2 style="color: #1a1a1a; margin-bottom: 20px;">ShoeLandia</h2>
+                <h2 style="color: #1a1a1a; margin-bottom: 20px;">AcriLook</h2>
                 <div style="color: #333; line-height: 1.6;">
                   ${mensaje.replace(/\n/g, '<br>')}
                 </div>
                 <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
                 <p style="color: #999; font-size: 0.9em; text-align: center;">
-                  Este email fue enviado por ShoeLandia<br>
-                  <a href="https://shoelandia.es" style="color: #667eea;">www.shoelandia.es</a>
+                  Este email fue enviado por AcriLook<br>
+                  <a href="https://acrilook.es" style="color: #667eea;">www.acrilook.es</a>
                 </p>
               </div>
             </div>
@@ -3323,12 +3323,12 @@ app.delete('/api/publicaciones/:id', requireAuth, async (req, res) => {
 app.get('/api/test-email', async (req, res) => {
   try {
     await transporter.sendMail({
-      from: '"ShoeLandia Test" <info@shoelandia.es>',
+      from: '"AcriLook Test" <info@acrilook.es>',
       to: 'pablo.martinezruiz@protonmail.com',
-      subject: 'Prueba de Correo - ShoeLandia',
+      subject: 'Prueba de Correo - AcriLook',
       html: `
         <h1 style="color: #667eea;">¡Correo de Prueba!</h1>
-        <p>Este correo se envió correctamente desde el servidor de ShoeLandia.</p>
+        <p>Este correo se envió correctamente desde el servidor de AcriLook.</p>
         <p>Configuración SMTP de OVH funcionando ✅</p>
       `
     });
