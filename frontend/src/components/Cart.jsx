@@ -19,6 +19,8 @@ const Cart = ({ onCheckout }) => {
     descuentoCupon,
     aplicarCupon,
     eliminarCupon,
+    getAcrispinPoints,
+    getProductAcrispinPoints,
   } = useCart();
 
   const { user, isAuthenticated } = useAuth();
@@ -350,6 +352,25 @@ const Cart = ({ onCheckout }) => {
                 <span>Total:</span>
                 <span className="total-amount">€{getCartTotal().toFixed(2)}</span>
               </div>
+
+              {/* Puntos Acrispin que se ganarán */}
+              {getAcrispinPoints() > 0 && (
+                <div className="cart-acrispin-points">
+                  <div className="acrispin-points-container">
+                    <Acrispin size="small" animated={true} reaction="excited" />
+                    <div className="acrispin-points-text">
+                      <div className="points-label">¡Ganarás con esta compra!</div>
+                      <div className="points-value">
+                        <span className="points-number">{getAcrispinPoints()}</span>
+                        <span className="points-unit">Puntos Acrispin</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="acrispin-points-info">
+                    1€ = 1 Acrispin • Úsalos para futuros descuentos
+                  </div>
+                </div>
+              )}
             </div>
             <button className="checkout-btn" onClick={onCheckout}>
               Proceder al Pago

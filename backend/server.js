@@ -24,7 +24,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || '');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3002;
 
 // Rutas de archivos de datos
 const DATA_DIR = path.join(__dirname, 'data');
@@ -36,6 +36,8 @@ const USUARIOS_FILE = path.join(DATA_DIR, 'usuarios.json');
 const TICKETS_FILE = path.join(DATA_DIR, 'tickets.json');
 const PUBLICACIONES_FILE = path.join(DATA_DIR, 'publicaciones.json');
 const AUTO_UPDATE_FILE = path.join(DATA_DIR, 'auto_update.json');
+const NOTAS_FILE = path.join(DATA_DIR, 'notas.json');
+const ADMINS_FILE = path.join(DATA_DIR, 'admins.json');
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 
 // Crear directorios si no existen
@@ -82,7 +84,7 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false, // true para 465, false para otros puertos
   auth: {
-    user: process.env.EMAIL_USER || 'info@acrilook.com',
+    user: process.env.EMAIL_USER || 'info@acrilook.es',
     pass: process.env.EMAIL_PASSWORD || '' // Configurar en .env
   },
   tls: {
@@ -462,12 +464,6 @@ async function enviarEmailCambioEstado(pedido, estadoAnterior) {
   }
 }
 
-// Credenciales de administrador (en producción usar base de datos)
-const ADMIN_USER = {
-  username: 'admin',
-  password: bcrypt.hashSync('admin123', 10) // Hash de "admin123"
-};
-
 // Middleware
 app.use(cors({
   origin: true, // Permitir el origen de la solicitud
@@ -664,6 +660,10 @@ let descuentoIdCounter = 1;
 let usuarios = [];
 let usuarioIdCounter = 1;
 
+// Base de datos en memoria (administradores)
+let admins = [];
+let adminIdCounter = 1;
+
 // Base de datos en memoria (publicaciones en RRSS)
 let publicaciones = [];
 let publicacionIdCounter = 1;
@@ -671,6 +671,10 @@ let publicacionIdCounter = 1;
 // Base de datos en memoria (tickets de soporte)
 let tickets = [];
 let ticketIdCounter = 1;
+
+// Base de datos en memoria (notas)
+let notas = [];
+let notaIdCounter = 1;
 
 // ==================== FUNCIONES DE PERSISTENCIA ====================
 
@@ -770,6 +774,15 @@ function cargarDatos() {
       console.log(`✅ ${usuarios.length} usuarios cargados`);
     }
 
+    // Cargar administradores
+    if (fs.existsSync(ADMINS_FILE)) {
+      const data = fs.readFileSync(ADMINS_FILE, 'utf8');
+      const parsed = JSON.parse(data);
+      admins = parsed.admins || admins;
+      adminIdCounter = parsed.counter || adminIdCounter;
+      console.log(`✅ ${admins.length} administradores cargados`);
+    }
+
     // Cargar tickets
     if (fs.existsSync(TICKETS_FILE)) {
       const data = fs.readFileSync(TICKETS_FILE, 'utf8');
@@ -786,6 +799,15 @@ function cargarDatos() {
       publicaciones = parsed.publicaciones || publicaciones;
       publicacionIdCounter = parsed.counter || publicacionIdCounter;
       console.log(`✅ ${publicaciones.length} publicaciones cargadas`);
+    }
+
+    // Cargar notas
+    if (fs.existsSync(NOTAS_FILE)) {
+      const data = fs.readFileSync(NOTAS_FILE, 'utf8');
+      const parsed = JSON.parse(data);
+      notas = parsed.notas || notas;
+      notaIdCounter = parsed.counter || notaIdCounter;
+      console.log(`✅ ${notas.length} notas cargadas`);
     }
   } catch (error) {
     console.error('❌ Error cargando datos:', error.message);
@@ -825,6 +847,12 @@ function guardarDatos() {
       counter: usuarioIdCounter
     }, null, 2), 'utf8');
 
+    // Guardar administradores
+    fs.writeFileSync(ADMINS_FILE, JSON.stringify({
+      admins,
+      counter: adminIdCounter
+    }, null, 2), 'utf8');
+
     // Guardar tickets
     fs.writeFileSync(TICKETS_FILE, JSON.stringify({
       tickets,
@@ -835,6 +863,12 @@ function guardarDatos() {
     fs.writeFileSync(PUBLICACIONES_FILE, JSON.stringify({
       publicaciones,
       counter: publicacionIdCounter
+    }, null, 2), 'utf8');
+
+    // Guardar notas
+    fs.writeFileSync(NOTAS_FILE, JSON.stringify({
+      notas,
+      counter: notaIdCounter
     }, null, 2), 'utf8');
 
     console.log('💾 Datos guardados correctamente');
@@ -918,9 +952,13 @@ const requireAuth = (req, res, next) => {
 app.post('/api/admin/login', (req, res) => {
   const { username, password } = req.body;
 
-  if (username === ADMIN_USER.username && bcrypt.compareSync(password, ADMIN_USER.password)) {
-    req.session.userId = username;
-    req.session.username = username;
+  // Buscar admin por email
+  const admin = admins.find(a => a.email === username);
+
+  if (admin && bcrypt.compareSync(password, admin.password)) {
+    req.session.userId = admin.id;
+    req.session.username = admin.email;
+    req.session.adminName = admin.nombre;
     res.json({ success: true, mensaje: 'Login exitoso' });
   } else {
     res.status(401).json({ success: false, mensaje: 'Credenciales incorrectas' });
@@ -986,7 +1024,18 @@ app.post('/api/clientes/registro', async (req, res) => {
       provincia: provincia || '',
       codigoPostal: codigoPostal || '',
       fechaRegistro: new Date().toISOString(),
-      pedidos: []
+      pedidos: [],
+      // Sistema de fidelización
+      puntos: 100, // Puntos de bienvenida
+      puntosHistorial: [{
+        cantidad: 100,
+        concepto: 'Bienvenida',
+        fecha: new Date().toISOString()
+      }],
+      nivel: 'Bronce',
+      descuentoActual: 0,
+      totalGastado: 0,
+      recompensasCanjeadas: []
     };
 
     usuarios.push(nuevoUsuario);
@@ -1137,6 +1186,203 @@ app.get('/api/clientes/pedidos', requireClientAuth, (req, res) => {
   res.json(pedidosCliente);
 });
 
+// ==================== SISTEMA DE FIDELIZACIÓN ====================
+
+// Obtener estadísticas de fidelización del cliente
+app.get('/api/clientes/fidelizacion', requireClientAuth, (req, res) => {
+  const usuario = usuarios.find(u => u.id === req.session.clienteId);
+  if (!usuario) {
+    return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+  }
+
+  // Asegurar que los campos existan (para usuarios antiguos)
+  if (!usuario.puntos) usuario.puntos = 0;
+  if (!usuario.puntosHistorial) usuario.puntosHistorial = [];
+  if (!usuario.nivel) usuario.nivel = 'Bronce';
+  if (!usuario.totalGastado) usuario.totalGastado = 0;
+  if (!usuario.recompensasCanjeadas) usuario.recompensasCanjeadas = [];
+
+  // Calcular nivel basado en total gastado
+  let nivel = 'Bronce';
+  let descuentoActual = 0;
+  let proximoNivel = 'Plata';
+  let progresoNivel = 0;
+  let faltaParaProximo = 100;
+
+  if (usuario.totalGastado >= 500) {
+    nivel = 'Diamante';
+    descuentoActual = 15;
+    proximoNivel = 'Diamante';
+    progresoNivel = 100;
+    faltaParaProximo = 0;
+  } else if (usuario.totalGastado >= 250) {
+    nivel = 'Oro';
+    descuentoActual = 10;
+    proximoNivel = 'Diamante';
+    progresoNivel = ((usuario.totalGastado - 250) / 250) * 100;
+    faltaParaProximo = 500 - usuario.totalGastado;
+  } else if (usuario.totalGastado >= 100) {
+    nivel = 'Plata';
+    descuentoActual = 5;
+    proximoNivel = 'Oro';
+    progresoNivel = ((usuario.totalGastado - 100) / 150) * 100;
+    faltaParaProximo = 250 - usuario.totalGastado;
+  } else {
+    nivel = 'Bronce';
+    descuentoActual = 0;
+    proximoNivel = 'Plata';
+    progresoNivel = (usuario.totalGastado / 100) * 100;
+    faltaParaProximo = 100 - usuario.totalGastado;
+  }
+
+  // Actualizar nivel en usuario
+  usuario.nivel = nivel;
+  usuario.descuentoActual = descuentoActual;
+  guardarDatos();
+
+  res.json({
+    puntos: usuario.puntos || 0,
+    nivel,
+    descuentoActual,
+    proximoNivel,
+    progresoNivel: Math.min(progresoNivel, 100),
+    faltaParaProximo: Math.max(faltaParaProximo, 0),
+    totalGastado: usuario.totalGastado || 0,
+    puntosHistorial: usuario.puntosHistorial || [],
+    recompensasCanjeadas: usuario.recompensasCanjeadas || []
+  });
+});
+
+// Obtener recompensas disponibles
+app.get('/api/clientes/recompensas', requireClientAuth, (req, res) => {
+  const recompensas = [
+    {
+      id: 1,
+      nombre: '5% de Descuento',
+      descripcion: 'Cupón del 5% de descuento en tu próxima compra',
+      puntos: 250,
+      tipo: 'porcentaje',
+      valor: 5,
+      icono: '💎'
+    },
+    {
+      id: 2,
+      nombre: 'Envío Gratis',
+      descripcion: 'Envío gratuito en tu próximo pedido',
+      puntos: 400,
+      tipo: 'envio',
+      valor: 0,
+      icono: '🚚'
+    },
+    {
+      id: 3,
+      nombre: '10% de Descuento',
+      descripcion: 'Cupón del 10% de descuento en tu próxima compra',
+      puntos: 500,
+      tipo: 'porcentaje',
+      valor: 10,
+      icono: '✨'
+    }
+  ];
+
+  const usuario = usuarios.find(u => u.id === req.session.clienteId);
+  const puntosDisponibles = usuario?.puntos || 0;
+
+  res.json({
+    recompensas,
+    puntosDisponibles
+  });
+});
+
+// Canjear recompensa
+app.post('/api/clientes/canjear-recompensa', requireClientAuth, async (req, res) => {
+  const { recompensaId } = req.body;
+  const usuarioIndex = usuarios.findIndex(u => u.id === req.session.clienteId);
+
+  if (usuarioIndex === -1) {
+    return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+  }
+
+  // Obtener recompensa
+  const recompensas = [
+    { id: 1, nombre: '5% de Descuento', puntos: 250, tipo: 'porcentaje', valor: 5 },
+    { id: 2, nombre: 'Envío Gratis', puntos: 400, tipo: 'envio', valor: 0 },
+    { id: 3, nombre: '10% de Descuento', puntos: 500, tipo: 'porcentaje', valor: 10 }
+  ];
+
+  const recompensa = recompensas.find(r => r.id === recompensaId);
+  if (!recompensa) {
+    return res.status(404).json({ mensaje: 'Recompensa no encontrada' });
+  }
+
+  const usuario = usuarios[usuarioIndex];
+
+  // Verificar puntos suficientes
+  if ((usuario.puntos || 0) < recompensa.puntos) {
+    return res.status(400).json({ mensaje: 'Puntos insuficientes' });
+  }
+
+  // Generar código de cupón
+  const codigoCupon = `REWARD${Date.now()}${Math.random().toString(36).substring(7).toUpperCase()}`;
+
+  // Crear descuento en el sistema
+  const nuevoDescuento = {
+    id: descuentoIdCounter++,
+    nombre: `${recompensa.nombre} - ${usuario.nombre}`,
+    porcentaje: recompensa.tipo === 'porcentaje' ? recompensa.valor : 0,
+    cantidad: recompensa.tipo === 'descuento' ? recompensa.valor : 0,
+    tipo: 'general',
+    aplicaA: null,
+    fechaInicio: new Date().toISOString(),
+    fechaFin: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(), // 90 días
+    activo: true,
+    codigo: codigoCupon,
+    tipoBeneficioGlobal: recompensa.tipo === 'porcentaje' ? 'porcentaje' : 'cantidad',
+    tipoCodigo: 'promocional',
+    vecesUsado: 0,
+    creadoEn: new Date().toISOString(),
+    montoMinimo: 0,
+    usuarioId: usuario.id
+  };
+
+  if (recompensa.tipo === 'envio') {
+    nuevoDescuento.tipoBeneficio = 'envio_gratis';
+    nuevoDescuento.tipo = 'pedido';
+  }
+
+  descuentos.push(nuevoDescuento);
+
+  // Descontar puntos
+  usuario.puntos -= recompensa.puntos;
+
+  // Agregar al historial
+  if (!usuario.puntosHistorial) usuario.puntosHistorial = [];
+  usuario.puntosHistorial.push({
+    cantidad: -recompensa.puntos,
+    concepto: `Canje: ${recompensa.nombre}`,
+    fecha: new Date().toISOString()
+  });
+
+  // Agregar a recompensas canjeadas
+  if (!usuario.recompensasCanjeadas) usuario.recompensasCanjeadas = [];
+  usuario.recompensasCanjeadas.push({
+    recompensa: recompensa.nombre,
+    codigo: codigoCupon,
+    fecha: new Date().toISOString()
+  });
+
+  guardarDatos();
+
+  res.json({
+    success: true,
+    mensaje: `¡Recompensa canjeada! Tu código es: ${codigoCupon}`,
+    codigo: codigoCupon,
+    puntosRestantes: usuario.puntos
+  });
+});
+
+// ==================== FIN SISTEMA DE FIDELIZACIÓN ====================
+
 // Obtener lista de todos los clientes (Admin)
 app.get('/api/admin/clientes', requireAuth, (req, res) => {
   const clientesConEstadisticas = usuarios.map(usuario => {
@@ -1252,6 +1498,35 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
           pedido.pagado = true;
           pedido.estadoPago = 'succeeded';
           pedido.fechaPago = new Date().toISOString();
+
+          // Sistema de fidelización: Agregar puntos y actualizar total gastado
+          if (pedido.clienteId) {
+            const usuario = usuarios.find(u => u.id === pedido.clienteId);
+            if (usuario) {
+              // Calcular puntos: 1 punto por cada euro gastado
+              const puntosGanados = Math.floor(pedido.total);
+
+              // Inicializar campos si no existen
+              if (!usuario.puntos) usuario.puntos = 0;
+              if (!usuario.puntosHistorial) usuario.puntosHistorial = [];
+              if (!usuario.totalGastado) usuario.totalGastado = 0;
+
+              // Agregar puntos
+              usuario.puntos += puntosGanados;
+              usuario.totalGastado += pedido.total;
+
+              // Registrar en historial
+              usuario.puntosHistorial.push({
+                cantidad: puntosGanados,
+                concepto: `Compra - Pedido #${pedido.id}`,
+                fecha: new Date().toISOString(),
+                pedidoId: pedido.id
+              });
+
+              console.log(`✨ +${puntosGanados} puntos para ${usuario.nombre} (Total: ${usuario.puntos} puntos)`);
+            }
+          }
+
           guardarDatos();
           console.log('✅ Pedido #' + pedido.id + ' marcado como pagado');
         }
@@ -1493,7 +1768,10 @@ app.post('/api/pedidos', (req, res) => {
 
   pedidos.push(nuevoPedido);
 
-  // Si hay un cliente asociado (autenticado o encontrado por email), agregar el pedido a su lista
+  // Calcular puntos Acrispin que ganará el cliente (1€ = 1 Acrispin)
+  const puntosAcrispin = Math.floor(total);
+
+  // Si hay un cliente asociado (autenticado o encontrado por email), agregar el pedido a su lista y puntos Acrispin
   if (clienteIdAsociado) {
     const usuario = usuarios.find(u => u.id === clienteIdAsociado);
     if (usuario) {
@@ -1501,8 +1779,29 @@ app.post('/api/pedidos', (req, res) => {
         usuario.pedidos = [];
       }
       usuario.pedidos.push(nuevoPedido.id);
+
+      // Agregar puntos Acrispin al usuario
+      if (!usuario.puntosAcrispin) {
+        usuario.puntosAcrispin = 0;
+      }
+      usuario.puntosAcrispin += puntosAcrispin;
+
+      // Registrar la transacción de puntos
+      if (!usuario.historialPuntos) {
+        usuario.historialPuntos = [];
+      }
+      usuario.historialPuntos.push({
+        fecha: new Date().toISOString(),
+        puntos: puntosAcrispin,
+        tipo: 'ganados',
+        concepto: `Compra - Pedido #${nuevoPedido.id}`,
+        pedidoId: nuevoPedido.id
+      });
     }
   }
+
+  // Agregar información de puntos al pedido
+  nuevoPedido.puntosAcrispinGanados = puntosAcrispin;
 
   guardarDatos();
 
@@ -1563,6 +1862,27 @@ app.delete('/api/pedidos/:id', requireAuth, (req, res) => {
   pedidos.splice(pedidoIndex, 1);
   guardarDatos();
   res.json({ mensaje: 'Pedido eliminado correctamente' });
+});
+
+// Endpoint para subir imágenes de productos
+app.post('/api/productos/upload-imagen', upload.single('imagen'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ mensaje: 'No se ha recibido ninguna imagen' });
+    }
+
+    // Generar URL accesible para la imagen
+    const imageUrl = `/uploads/${req.file.filename}`;
+
+    res.json({
+      mensaje: 'Imagen subida correctamente',
+      url: imageUrl,
+      filename: req.file.filename
+    });
+  } catch (error) {
+    console.error('Error al subir imagen:', error);
+    res.status(500).json({ mensaje: 'Error al subir la imagen' });
+  }
 });
 
 // Crear un nuevo producto
@@ -2405,6 +2725,153 @@ app.post('/api/descuentos/validar-cupon', (req, res) => {
   });
 });
 
+// ==================== RUTA DE NEWSLETTER/SUSCRIPCIÓN ====================
+
+// Función para generar código único de descuento
+function generarCodigoDescuento() {
+  const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let codigo = 'WELCOME';
+  for (let i = 0; i < 6; i++) {
+    codigo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+  }
+  return codigo;
+}
+
+// Función para enviar email de bienvenida con código de descuento
+async function enviarEmailBienvenidaNewsletter(email, codigo) {
+  try {
+    const mailOptions = {
+      from: '"AcriLook" <info@acrilook.es>',
+      to: email,
+      subject: '¡Bienvenido a AcriLook! Tu 10% de descuento te espera',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px;">
+          <div style="background: white; padding: 40px; border-radius: 10px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #667eea; margin: 0;">💎 ¡Bienvenido a AcriLook!</h1>
+            </div>
+
+            <p style="font-size: 16px; color: #333; line-height: 1.6;">
+              Gracias por suscribirte a nuestro newsletter. Como agradecimiento, te regalamos un <strong style="color: #667eea;">10% de descuento</strong> en tu primera compra.
+            </p>
+
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px; text-align: center; margin: 30px 0;">
+              <p style="color: white; margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Tu código de descuento</p>
+              <h2 style="color: #ffd700; font-size: 32px; margin: 0; letter-spacing: 3px; font-weight: bold;">${codigo}</h2>
+              <p style="color: rgba(255, 255, 255, 0.9); margin: 15px 0 0 0; font-size: 14px;">Válido para tu primera compra</p>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+              <h3 style="color: #333; margin: 0 0 15px 0; font-size: 18px;">¿Cómo usar tu código?</h3>
+              <ol style="color: #666; line-height: 1.8; margin: 0; padding-left: 20px;">
+                <li>Explora nuestra colección de pendientes acrílicos</li>
+                <li>Añade tus favoritos al carrito</li>
+                <li>Introduce el código <strong>${codigo}</strong> al finalizar tu compra</li>
+                <li>¡Disfruta de tu descuento!</li>
+              </ol>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+              <a href="https://acrilook.es" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 50px; font-weight: bold; display: inline-block;">
+                Ir a la Tienda
+              </a>
+            </div>
+
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
+              <p style="color: #999; font-size: 12px; margin: 0;">
+                Recibirás noticias sobre nuevos productos, ofertas exclusivas y tendencias en joyería acrílica.
+              </p>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin-top: 20px;">
+            <p style="color: white; font-size: 12px;">
+              © 2024 AcriLook. Todos los derechos reservados.
+            </p>
+          </div>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Email de bienvenida enviado a ${email}`);
+  } catch (error) {
+    console.error('❌ Error enviando email de bienvenida:', error.message);
+    throw error;
+  }
+}
+
+// Suscribirse al newsletter y obtener código de descuento
+app.post('/api/newsletter/subscribe', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ message: 'Email válido requerido' });
+  }
+
+  try {
+    // Verificar si el email ya tiene un descuento de suscripción activo
+    const descuentoExistente = descuentos.find(d =>
+      d.tipo === 'newsletter' &&
+      d.email === email.toLowerCase() &&
+      d.activo === true
+    );
+
+    if (descuentoExistente) {
+      return res.status(400).json({
+        message: 'Este email ya ha sido utilizado para suscribirse. Revisa tu correo para encontrar tu código de descuento.',
+        codigo: descuentoExistente.codigo
+      });
+    }
+
+    // Generar código único
+    let codigo = generarCodigoDescuento();
+
+    // Asegurar que el código sea único
+    while (descuentos.find(d => d.codigo === codigo)) {
+      codigo = generarCodigoDescuento();
+    }
+
+    // Crear descuento de suscripción
+    const nuevoDescuento = {
+      id: descuentoIdCounter++,
+      nombre: `Newsletter - ${email}`,
+      email: email.toLowerCase(),
+      porcentaje: 10,
+      tipo: 'newsletter', // Nuevo tipo para identificar suscripciones
+      aplicaA: null,
+      fechaInicio: new Date().toISOString(),
+      fechaFin: null, // Sin fecha de expiración
+      activo: true,
+      codigo: codigo,
+      vecesUsado: 0,
+      creadoEn: new Date().toISOString(),
+      montoMinimo: 0,
+      tipoBeneficio: null,
+      tipoBeneficioGlobal: 'porcentaje',
+      cantidad: 0,
+      tipoCodigo: 'promocional'
+    };
+
+    descuentos.push(nuevoDescuento);
+    guardarDatos();
+
+    // Enviar email con el código
+    await enviarEmailBienvenidaNewsletter(email, codigo);
+
+    res.json({
+      success: true,
+      message: 'Suscripción exitosa. Revisa tu email para obtener tu código de descuento.',
+      codigo: codigo
+    });
+  } catch (error) {
+    console.error('Error en suscripción:', error);
+    res.status(500).json({
+      message: 'Error al procesar la suscripción. Por favor, inténtalo de nuevo más tarde.'
+    });
+  }
+});
+
 // ==================== RUTA DE CONTACTO (email simple) ====================
 
 // Enviar email de contacto (no crea ticket)
@@ -2561,8 +3028,22 @@ app.post('/api/tickets/:id/mensajes', upload.array('archivos', 5), (req, res) =>
     // Es admin
     tipo = 'admin';
     autor = 'Soporte';
-  } else if (req.session && req.session.clienteId && ticket.clienteId !== req.session.clienteId) {
-    return res.status(403).json({ mensaje: 'No tienes permiso para responder a este ticket' });
+  } else if (req.session && req.session.clienteId) {
+    // Es cliente - verificar que sea el dueño del ticket
+    if (ticket.clienteId !== req.session.clienteId) {
+      return res.status(403).json({ mensaje: 'No tienes permiso para responder a este ticket' });
+    }
+    // Obtener el nombre del usuario actual desde la base de datos
+    const usuario = usuarios.find(u => u.id === req.session.clienteId);
+    if (usuario) {
+      tipo = 'cliente';
+      autor = usuario.nombre;
+    } else {
+      return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+    }
+  } else {
+    // No hay sesión válida
+    return res.status(401).json({ mensaje: 'No autorizado' });
   }
 
   // Procesar archivos adjuntos
@@ -3318,6 +3799,87 @@ app.delete('/api/publicaciones/:id', requireAuth, async (req, res) => {
 });
 
 // ==================== FIN ENDPOINTS DE MARKETING ====================
+
+// ==================== ENDPOINTS DE NOTAS ====================
+
+// Obtener todas las notas
+app.get('/api/notas', requireAuth, (req, res) => {
+  res.json(notas);
+});
+
+// Obtener una nota por ID
+app.get('/api/notas/:id', requireAuth, (req, res) => {
+  const id = parseInt(req.params.id);
+  const nota = notas.find(n => n.id === id);
+
+  if (!nota) {
+    return res.status(404).json({ mensaje: 'Nota no encontrada' });
+  }
+
+  res.json(nota);
+});
+
+// Crear nueva nota
+app.post('/api/notas', requireAuth, (req, res) => {
+  const { titulo, contenido, color } = req.body;
+
+  if (!titulo || !contenido) {
+    return res.status(400).json({ mensaje: 'Título y contenido son requeridos' });
+  }
+
+  const nuevaNota = {
+    id: notaIdCounter++,
+    titulo,
+    contenido,
+    color: color || '#fef08a',
+    fechaCreacion: new Date().toISOString()
+  };
+
+  notas.push(nuevaNota);
+  guardarDatos();
+
+  res.status(201).json(nuevaNota);
+});
+
+// Actualizar nota
+app.put('/api/notas/:id', requireAuth, (req, res) => {
+  const id = parseInt(req.params.id);
+  const { titulo, contenido, color } = req.body;
+
+  const notaIndex = notas.findIndex(n => n.id === id);
+
+  if (notaIndex === -1) {
+    return res.status(404).json({ mensaje: 'Nota no encontrada' });
+  }
+
+  notas[notaIndex] = {
+    ...notas[notaIndex],
+    titulo: titulo || notas[notaIndex].titulo,
+    contenido: contenido || notas[notaIndex].contenido,
+    color: color || notas[notaIndex].color,
+    fechaModificacion: new Date().toISOString()
+  };
+
+  guardarDatos();
+  res.json(notas[notaIndex]);
+});
+
+// Eliminar nota
+app.delete('/api/notas/:id', requireAuth, (req, res) => {
+  const id = parseInt(req.params.id);
+  const notaIndex = notas.findIndex(n => n.id === id);
+
+  if (notaIndex === -1) {
+    return res.status(404).json({ mensaje: 'Nota no encontrada' });
+  }
+
+  notas.splice(notaIndex, 1);
+  guardarDatos();
+
+  res.json({ mensaje: 'Nota eliminada correctamente' });
+});
+
+// ==================== FIN ENDPOINTS DE NOTAS ====================
 
 // Endpoint de prueba para enviar correo (TEMPORAL - eliminar en producción)
 app.get('/api/test-email', async (req, res) => {

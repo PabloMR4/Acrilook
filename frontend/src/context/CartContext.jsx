@@ -143,6 +143,17 @@ export const CartProvider = ({ children }) => {
     return cartItems.reduce((count, item) => count + item.cantidad, 0);
   };
 
+  // Calcular puntos Acrispin que se ganarán (1€ = 1 Acrispin)
+  const getAcrispinPoints = () => {
+    const total = getCartTotal();
+    return Math.floor(total); // Redondear hacia abajo
+  };
+
+  // Calcular puntos Acrispin por producto individual
+  const getProductAcrispinPoints = (precio, cantidad = 1) => {
+    return Math.floor(precio * cantidad);
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -162,6 +173,8 @@ export const CartProvider = ({ children }) => {
         descuentoCupon,
         aplicarCupon,
         eliminarCupon,
+        getAcrispinPoints,
+        getProductAcrispinPoints,
       }}
     >
       {children}
