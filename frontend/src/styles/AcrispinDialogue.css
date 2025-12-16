@@ -1,0 +1,147 @@
+.acrispin-dialogue-bubble {
+  position: relative;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 18px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 280px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  opacity: 0;
+  transform: scale(0.8) translateY(10px);
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  z-index: 100;
+  animation: float 3s ease-in-out infinite;
+}
+
+.acrispin-dialogue-bubble.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.bubble-content {
+  position: relative;
+  z-index: 2;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* Cola de la burbuja */
+.bubble-tail {
+  position: absolute;
+  bottom: -8px;
+  left: 20px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #764ba2;
+  filter: drop-shadow(0 2px 3px rgba(102, 126, 234, 0.2));
+}
+
+/* Animación de flotación sutil */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-5px) scale(1);
+  }
+}
+
+/* Efecto de brillo */
+.acrispin-dialogue-bubble::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  border-radius: 20px;
+  opacity: 0;
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0%, 100% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(100%);
+  }
+}
+
+/* Versión compacta para móvil */
+@media (max-width: 768px) {
+  .acrispin-dialogue-bubble {
+    max-width: 220px;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+}
+
+/* Variantes de posición */
+.acrispin-dialogue-bubble.top {
+  margin-bottom: 15px;
+}
+
+.acrispin-dialogue-bubble.bottom {
+  margin-top: 15px;
+}
+
+.acrispin-dialogue-bubble.bottom .bubble-tail {
+  bottom: auto;
+  top: -8px;
+  border-top: none;
+  border-bottom: 10px solid #667eea;
+}
+
+/* Efecto hover */
+.acrispin-dialogue-bubble:hover {
+  transform: scale(1.05) translateY(0);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Animación de entrada especial */
+@keyframes bubblePop {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.acrispin-dialogue-bubble.pop-in {
+  animation: bubblePop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Estilo para mensajes especiales */
+.acrispin-dialogue-bubble.special {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+}
+
+.acrispin-dialogue-bubble.success {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+}
+
+.acrispin-dialogue-bubble.tip {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  box-shadow: 0 4px 15px rgba(250, 112, 154, 0.4);
+}

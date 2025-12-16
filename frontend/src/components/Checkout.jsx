@@ -3,6 +3,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { crearPedido } from '../services/api';
 import StripeCheckout from './StripeCheckout';
+import Acrispin from './Acrispin';
 import '../styles/Checkout.css';
 
 const Checkout = ({ onClose }) => {
@@ -194,6 +195,15 @@ const Checkout = ({ onClose }) => {
       <div className="checkout-modal">
         <div className="checkout-overlay" onClick={onClose} />
         <div className="checkout-content success-message">
+          <div className="success-celebration">
+            <Acrispin
+              size="xlarge"
+              animated={true}
+              showDialogue={true}
+              dialogueMessage="¡Pedido completado! 🎉 ¡Gracias por tu compra! 💜"
+              dialogueAutoChange={false}
+            />
+          </div>
           <div className="success-icon">✓</div>
           <h2>¡Pedido Realizado!</h2>
           <p>Tu pedido ha sido procesado correctamente.</p>

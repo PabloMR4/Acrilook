@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Acrispin from './Acrispin';
 import '../styles/ProductCard.css';
 
 const ProductCard = ({ producto, onProductClick }) => {
@@ -96,6 +97,18 @@ const ProductCard = ({ producto, onProductClick }) => {
       <div className="product-image-container">
         <img src={imagenes[currentImageIndex]} alt={producto.nombre} className="product-image" />
 
+        {producto.descuento && (
+          <div className="product-discount-acrispin">
+            <Acrispin
+              size="small"
+              animated={true}
+              showDialogue={true}
+              dialogueMessage={`¡${producto.descuento.porcentaje}% OFF! 🎁`}
+              dialogueAutoChange={false}
+            />
+          </div>
+        )}
+
         {tieneMultiplesImagenes && (
           <>
             <button className="carousel-btn carousel-btn-prev" onClick={prevImage}>
@@ -123,19 +136,6 @@ const ProductCard = ({ producto, onProductClick }) => {
       <div className="product-info">
         <h3 className="product-name">{producto.nombre}</h3>
         <p className={`product-category ${getCategoryColorClass()}`}>{producto.rutaCategoria || producto.categoria}</p>
-
-        {/* Mostrar tallas disponibles */}
-        {variantes.length > 0 && (
-          <div className="tallas-disponibles">
-            <span className="tallas-label">Tallas: </span>
-            {variantes.map((v, idx) => (
-              <span key={v.id} className={`talla-badge ${v.stock === 0 ? 'sin-stock' : ''}`}>
-                {v.talla}
-                {idx < variantes.length - 1 && ', '}
-              </span>
-            ))}
-          </div>
-        )}
 
         <div className="product-price-container">
           {producto.descuento ? (

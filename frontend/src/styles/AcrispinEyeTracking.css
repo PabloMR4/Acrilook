@@ -1,0 +1,117 @@
+.acrispin-eye-tracking-container {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+
+.acrispin-eye-tracking-svg {
+  display: block;
+  filter: drop-shadow(0 4px 8px rgba(102, 126, 234, 0.3));
+  cursor: pointer;
+}
+
+/* Animación de flotación */
+.acrispin-eye-tracking-container.animated .acrispin-eye-tracking-svg {
+  animation: floatTracking 3s ease-in-out infinite;
+}
+
+@keyframes floatTracking {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.02);
+  }
+}
+
+/* Animación del cuerpo (pulsación suave) */
+.acrispin-eye-tracking-container.animated .acrispin-body-tracking {
+  animation: pulseTracking 2s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes pulseTracking {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+/* Animación del brillo */
+.acrispin-eye-tracking-container.animated .acrispin-shine-tracking {
+  animation: shineTracking 2s ease-in-out infinite;
+}
+
+@keyframes shineTracking {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Transición suave de las pupilas */
+.acrispin-pupil-tracking {
+  transition: cx 0.15s ease-out, cy 0.15s ease-out;
+}
+
+/* Animación de la sonrisa */
+.acrispin-eye-tracking-container.animated .acrispin-smile-tracking {
+  animation: smileTracking 3s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes smileTracking {
+  0%, 100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(1.05);
+  }
+}
+
+/* Animación de cejas (se mueven ligeramente) */
+.acrispin-eyebrow {
+  animation: eyebrowMove 4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.left-eyebrow {
+  animation-delay: 0s;
+}
+
+.right-eyebrow {
+  animation-delay: 0.2s;
+}
+
+@keyframes eyebrowMove {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-1px);
+  }
+}
+
+/* Hover effect */
+.acrispin-eye-tracking-container:hover .acrispin-eye-tracking-svg {
+  transform: scale(1.1);
+  transition: transform 0.3s ease;
+}
+
+/* Efecto de curiosidad cuando el cursor se acerca */
+.acrispin-eye-tracking-container:hover .acrispin-pupil-tracking {
+  r: 3.5;
+  transition: r 0.2s ease;
+}
+
+.acrispin-eye-tracking-container:hover .left-eyebrow,
+.acrispin-eye-tracking-container:hover .right-eyebrow {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease;
+}

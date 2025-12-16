@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import Acrispin from './Acrispin';
 import '../styles/Cart.css';
 
 const Cart = ({ onCheckout }) => {
@@ -19,9 +21,13 @@ const Cart = ({ onCheckout }) => {
     eliminarCupon,
   } = useCart();
 
+  const { user, isAuthenticated } = useAuth();
   const [codigoCupon, setCodigoCupon] = useState('');
   const [mensajeCupon, setMensajeCupon] = useState('');
   const [cargandoCupon, setCargandoCupon] = useState(false);
+  const [acrispinDisponibles, setAcrispinDisponibles] = useState(0);
+  const [recompensasDisponibles, setRecompensasDisponibles] = useState([]);
+  const [mostrarRecompensas, setMostrarRecompensas] = useState(false);
 
   const handleAplicarCupon = async () => {
     if (!codigoCupon.trim()) {
@@ -50,6 +56,75 @@ const Cart = ({ onCheckout }) => {
     setMensajeCupon('');
   };
 
+  // Cargar Acrispin disponibles del usuario
+  useEffect(() => {
+    const cargarAcrispin = async () => {
+      if (isAuthenticated && isCartOpen) {
+        try {
+          const response = await fetch('/api/clientes/fidelizacion', {
+            credentials: 'include'
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setAcrispinDisponibles(data.puntos || 0);
+          }
+
+          // Cargar recompensas disponibles
+          const respRecompensas = await fetch('/api/clientes/recompensas', {
+            credentials: 'include'
+          });
+
+          if (respRecompensas.ok) {
+            const dataRecompensas = await respRecompensas.json();
+            setRecompensasDisponibles(dataRecompensas.recompensas || []);
+          }
+        } catch (error) {
+          console.error('Error cargando Acrispin:', error);
+        }
+      }
+    };
+
+    cargarAcrispin();
+  }, [isAuthenticated, isCartOpen]);
+
+  const handleCanjearAcrispin = async (recompensaId) => {
+    try {
+      const response = await fetch('/api/clientes/canjear-recompensa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ recompensaId })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // El cupón se ha creado, ahora aplicarlo automáticamente
+        if (data.codigo) {
+          const resultado = await aplicarCupon(data.codigo);
+          if (resultado.success) {
+            setMensajeCupon('✓ Acrispin canjeados correctamente');
+            setMostrarRecompensas(false);
+            // Recargar Acrispin disponibles
+            const respFid = await fetch('/api/clientes/fidelizacion', {
+              credentials: 'include'
+            });
+            if (respFid.ok) {
+              const dataFid = await respFid.json();
+              setAcrispinDisponibles(dataFid.puntos || 0);
+            }
+          }
+        }
+      } else {
+        setMensajeCupon('✗ ' + (data.mensaje || 'Error al canjear Acrispin'));
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setMensajeCupon('✗ Error al canjear Acrispin');
+    }
+  };
+
   if (!isCartOpen) return null;
 
   return (
@@ -57,7 +132,15 @@ const Cart = ({ onCheckout }) => {
       <div className="cart-overlay" onClick={() => setIsCartOpen(false)} />
       <div className={`cart-sidebar ${isCartOpen ? 'open' : ''}`}>
         <div className="cart-header">
-          <h2>Tu Carrito</h2>
+          <div className="cart-header-content">
+            <h2>Tu Carrito</h2>
+            {cartItems.length > 0 && (
+              <div className="cart-header-acrispin">
+                <Acrispin size="small" animated={true} />
+                <span className="cart-items-count">{cartItems.length} {cartItems.length === 1 ? 'producto' : 'productos'}</span>
+              </div>
+            )}
+          </div>
           <button className="close-btn" onClick={() => setIsCartOpen(false)}>
             ×
           </button>
@@ -66,9 +149,35 @@ const Cart = ({ onCheckout }) => {
         <div className="cart-items">
           {cartItems.length === 0 ? (
             <div className="empty-cart">
-              <p>Tu carrito está vacío</p>
-              <button onClick={() => setIsCartOpen(false)}>
-                Seguir Comprando
+              <div className="empty-cart-acrispin">
+                <Acrispin
+                  size="xlarge"
+                  animated={true}
+                  showDialogue={true}
+                  dialogueMessage="¡Tu carrito está vacío! 🛍️ ¡Vamos a llenarlo juntos! ✨"
+                  dialogueAutoChange={false}
+                />
+              </div>
+              <h3 className="empty-cart-title">¡Uy! Acrispin está solito aquí</h3>
+              <p className="empty-cart-message">
+                Añade productos y empieza a ganar Acrispin con cada compra
+              </p>
+              <div className="empty-cart-benefits">
+                <div className="benefit-item">
+                  <span className="benefit-icon">✨</span>
+                  <span>1€ = 1 Acrispin</span>
+                </div>
+                <div className="benefit-item">
+                  <span className="benefit-icon">🎁</span>
+                  <span>Canjea por descuentos</span>
+                </div>
+                <div className="benefit-item">
+                  <span className="benefit-icon">🚚</span>
+                  <span>Envío gratis disponible</span>
+                </div>
+              </div>
+              <button className="btn-shop-now" onClick={() => setIsCartOpen(false)}>
+                ¡Vamos a comprar!
               </button>
             </div>
           ) : (
@@ -125,6 +234,52 @@ const Cart = ({ onCheckout }) => {
 
         {cartItems.length > 0 && (
           <div className="cart-footer">
+            {/* Sección de Acrispin */}
+            {isAuthenticated && acrispinDisponibles > 0 && !cuponAplicado && (
+              <div className="acrispin-section">
+                <div className="acrispin-header" onClick={() => setMostrarRecompensas(!mostrarRecompensas)}>
+                  <div className="acrispin-info">
+                    <Acrispin size="small" animated={true} />
+                    <span className="acrispin-text">
+                      Tienes <strong>{acrispinDisponibles} Acrispin</strong> disponibles
+                    </span>
+                  </div>
+                  <button className="acrispin-toggle">
+                    {mostrarRecompensas ? '▼' : '▶'}
+                  </button>
+                </div>
+
+                {mostrarRecompensas && (
+                  <div className="recompensas-lista-cart">
+                    {recompensasDisponibles.map(recompensa => (
+                      <div
+                        key={recompensa.id}
+                        className={`recompensa-item-cart ${acrispinDisponibles < recompensa.puntos ? 'disabled' : ''}`}
+                      >
+                        <div className="recompensa-info-cart">
+                          <span className="recompensa-icono">{recompensa.icono}</span>
+                          <div>
+                            <div className="recompensa-nombre-cart">{recompensa.nombre}</div>
+                            <div className="recompensa-costo">
+                              <Acrispin size="small" animated={false} />
+                              {recompensa.puntos} Acrispin
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          className="btn-canjear-cart"
+                          onClick={() => handleCanjearAcrispin(recompensa.id)}
+                          disabled={acrispinDisponibles < recompensa.puntos}
+                        >
+                          {acrispinDisponibles < recompensa.puntos ? 'Insuficientes' : 'Canjear'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Campo de Código Promocional */}
             <div className="cupon-section">
               {!cuponAplicado ? (
