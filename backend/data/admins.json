@@ -1,0 +1,12 @@
+{
+  "admins": [
+    {
+      "id": 1,
+      "email": "pablo.martinezruiz@protonmail.com",
+      "password": "$2b$10$a7XQKpXlPJEYM67065gcK.4Qh4TDfp0bbISqB4l4XoqqbBrqgVrhe",
+      "nombre": "Pablo Martínez Ruiz",
+      "fechaCreacion": "2025-12-14T00:00:00.000Z"
+    }
+  ],
+  "counter": 2
+}

@@ -10,7 +10,7 @@ module.exports = {
       max_memory_restart: '1G',
       env: {
         NODE_ENV: 'production',
-        PORT: 3000
+        PORT: 3002
       },
       error_file: './logs/backend-error.log',
       out_file: './logs/backend-out.log',
@@ -21,7 +21,7 @@ module.exports = {
       name: 'acrilook-frontend',
       cwd: './frontend',
       script: 'npx',
-      args: 'vite preview --host 0.0.0.0 --port 5173',
+      args: 'vite preview --host 0.0.0.0 --port 5174',
       instances: 1,
       autorestart: true,
       watch: false,

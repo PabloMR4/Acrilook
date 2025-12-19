@@ -145,7 +145,7 @@ ${genero ? `Género: ${genero}` : ''}
 📦 Envíos a todo el país / 🚚 Entrega rápida en 24h
 👇 ¡Consíguelas ya!
 
-Web: https://www.acrilook.com
+Web: https://www.acrilook.es
 
 #Acrilico #Decoracion #Tendencia #DiseñoModerno #Organizacion #HomeDecor #Interiorismo #Deco2025 #AcryliLovers #DecoAcrilica`;
 

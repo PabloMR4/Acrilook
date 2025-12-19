@@ -4,7 +4,7 @@ Una tienda online completa y profesional para la venta de productos acrílicos y
 
 ## 🌐 Demo en Vivo
 
-**URL:** [https://acrilook.com](https://acrilook.com)
+**URL:** [https://acrilook.es](https://acrilook.es)
 
 ## ✨ Características Principales
 
@@ -485,7 +485,7 @@ Crea uno desde el registro o en el panel admin
 
 ## 📈 Estado del Proyecto
 
-✅ **Funcional en Producción:** [https://acrilook.com](https://acrilook.com)
+✅ **Funcional en Producción:** [https://acrilook.es](https://acrilook.es)
 
 ### Características Implementadas
 - [x] Sistema completo de e-commerce

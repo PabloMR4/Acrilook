@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin - Moda Store</title>
+    <title>Panel Admin - AcriLook</title>
     <style>
         * {
             margin: 0;
@@ -917,13 +917,128 @@
             opacity: 0.4;
             cursor: not-allowed;
         }
+
+        /* Estilos para Notas */
+        .color-option {
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .color-option input[type="radio"] {
+            display: none;
+        }
+
+        .color-circle {
+            display: block;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .color-option input[type="radio"]:checked + .color-circle {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            transform: scale(1.1);
+        }
+
+        .color-circle:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .nota-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            cursor: move;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 180px;
+        }
+
+        .nota-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .nota-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .nota-titulo {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #333;
+            margin: 0;
+            flex: 1;
+            word-wrap: break-word;
+        }
+
+        .nota-acciones {
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .nota-card:hover .nota-acciones {
+            opacity: 1;
+        }
+
+        .nota-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 1.2em;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .nota-btn:hover {
+            background: rgba(0,0,0,0.1);
+        }
+
+        .nota-contenido {
+            color: #555;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            flex: 1;
+            margin-bottom: 15px;
+        }
+
+        .nota-fecha {
+            font-size: 0.75em;
+            color: #999;
+            text-align: right;
+            margin-top: auto;
+        }
+
+        .nota-color-strip {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            border-radius: 12px 12px 0 0;
+        }
     </style>
 </head>
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
-            <h2>ShoeLandia</h2>
+            <h2>AcriLook</h2>
             <p>Panel Administrativo</p>
         </div>
 
@@ -959,6 +1074,10 @@
             <div class="menu-item" onclick="showSection('analiticas', this)">
                 <span class="menu-item-icon">📊</span>
                 <span>Analíticas</span>
+            </div>
+            <div class="menu-item" onclick="showSection('notas', this)">
+                <span class="menu-item-icon">📝</span>
+                <span>Notas</span>
             </div>
         </div>
 
@@ -1041,24 +1160,11 @@
         <!-- Sección Productos -->
         <div id="productos" class="section">
             <div class="container">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h1 style="margin: 0;">📦 Productos</h1>
-                    <div id="ultima-actualizacion-display" style="background: #e3f2fd; padding: 12px 20px; border-radius: 10px; border-left: 4px solid #2196f3;">
-                        <div style="font-size: 0.75em; color: #666; margin-bottom: 3px;">Última actualización automática</div>
-                        <div id="ultima-actualizacion-texto" style="font-weight: 600; color: #1976d2; font-size: 0.9em;">
-                            Cargando...
-                        </div>
-                        <button onclick="forzarActualizacion()" style="margin-top: 8px; padding: 5px 12px; font-size: 0.8em; background: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                            🔄 Actualizar ahora
-                        </button>
-                    </div>
-                </div>
+                <h1 style="margin-bottom: 20px;">📦 Productos</h1>
 
                 <div class="action-buttons">
                     <button class="btn-primary" onclick="abrirModalProducto()">➕ Nuevo Producto</button>
                     <button class="btn-secondary" onclick="abrirModalCategorias()">🏷️ Añadir/Editar Categorías</button>
-                    <button class="btn-secondary" onclick="abrirModalActualizarProductos()" style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);">🔄 Actualizar Productos</button>
-                    <button class="btn-secondary" onclick="abrirModalProductosNuevos()" style="background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);">✨ Añadir Productos Nuevos</button>
                     <button id="btnEliminarSeleccionados" class="btn-secondary" onclick="eliminarProductosSeleccionados()" style="background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%); display: none;">🗑️ Eliminar Seleccionados (<span id="contadorSeleccionados">0</span>)</button>
                 </div>
 
@@ -1504,6 +1610,88 @@
                 </div>
             </div>
         </div>
+
+        <!-- Sección Notas - Vista Lista -->
+        <div id="notas" class="section">
+            <div class="container">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <div>
+                        <h1 style="margin: 0;">📝 Notas</h1>
+                        <p style="color: #666; margin: 5px 0 0;">Tu pizarra personal para recordatorios, ideas y tareas pendientes</p>
+                    </div>
+                    <button class="btn-primary" onclick="mostrarFormularioNota()" style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.2em;">➕</span>
+                        Añadir Nota
+                    </button>
+                </div>
+
+                <!-- Grid de notas -->
+                <div id="notasGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                    <div class="loading">Cargando notas...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección Nueva/Editar Nota -->
+        <div id="notasFormulario" class="section" style="display: none;">
+            <div class="container">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
+                    <button class="btn-secondary" onclick="volverANotas()" style="display: flex; align-items: center; gap: 8px;">
+                        <span>←</span>
+                        Volver
+                    </button>
+                    <h1 style="margin: 0;" id="tituloFormularioNota">✏️ Nueva Nota</h1>
+                </div>
+
+                <div class="card">
+                    <div style="padding: 40px;">
+                        <form id="formNota" onsubmit="guardarNota(event)">
+                            <div class="form-group">
+                                <label style="font-size: 1.1em; font-weight: 600;">Título</label>
+                                <input type="text" id="notaTitulo" placeholder="Ej: Recordatorio importante" required style="font-size: 1.1em;">
+                            </div>
+                            <div class="form-group">
+                                <label style="font-size: 1.1em; font-weight: 600;">Contenido</label>
+                                <textarea id="notaContenido" rows="10" placeholder="Escribe tu nota aquí..." required style="font-size: 1em; line-height: 1.6;"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label style="font-size: 1.1em; font-weight: 600;">Color de la Nota</label>
+                                <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px;">
+                                    <label class="color-option">
+                                        <input type="radio" name="notaColor" value="#fef08a" checked>
+                                        <span class="color-circle" style="background: #fef08a;"></span>
+                                    </label>
+                                    <label class="color-option">
+                                        <input type="radio" name="notaColor" value="#bfdbfe">
+                                        <span class="color-circle" style="background: #bfdbfe;"></span>
+                                    </label>
+                                    <label class="color-option">
+                                        <input type="radio" name="notaColor" value="#fecaca">
+                                        <span class="color-circle" style="background: #fecaca;"></span>
+                                    </label>
+                                    <label class="color-option">
+                                        <input type="radio" name="notaColor" value="#bbf7d0">
+                                        <span class="color-circle" style="background: #bbf7d0;"></span>
+                                    </label>
+                                    <label class="color-option">
+                                        <input type="radio" name="notaColor" value="#e9d5ff">
+                                        <span class="color-circle" style="background: #e9d5ff;"></span>
+                                    </label>
+                                    <label class="color-option">
+                                        <input type="radio" name="notaColor" value="#fed7aa">
+                                        <span class="color-circle" style="background: #fed7aa;"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                                <button type="submit" class="btn-primary" style="flex: 1;">💾 Guardar Nota</button>
+                                <button type="button" class="btn-secondary btn-cancelar-nota" onclick="volverANotas()" style="display: none;">❌ Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <!-- Fin Main Content -->
 
@@ -1633,25 +1821,46 @@
                 </div>
 
                 <div class="form-group">
-                    <label>URLs de Imágenes</label>
+                    <label>Imágenes del Producto</label>
                     <div id="imagenesContainer">
                         <!-- Las imágenes se añadirán aquí dinámicamente -->
                     </div>
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <input type="url" class="form-control" id="nuevaImagenUrl" placeholder="https://ejemplo.com/imagen.jpg">
-                        <button type="button" class="btn-primary" onclick="agregarImagen()" style="white-space: nowrap; padding: 10px 20px;">➕ Añadir</button>
+
+                    <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <!-- Opción 1: Subir desde PC -->
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #667eea;">
+                                    📁 Subir desde PC
+                                </label>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="file" class="form-control" id="nuevaImagenArchivo" accept="image/*" style="flex: 1;">
+                                    <button type="button" class="btn-primary" onclick="agregarImagenArchivo()" style="white-space: nowrap; padding: 10px 20px;">➕ Añadir</button>
+                                </div>
+                            </div>
+
+                            <!-- Separador -->
+                            <div style="text-align: center; color: #999; font-weight: 600;">— o —</div>
+
+                            <!-- Opción 2: URL -->
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #667eea;">
+                                    🔗 Agregar por URL
+                                </label>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="url" class="form-control" id="nuevaImagenUrl" placeholder="https://ejemplo.com/imagen.jpg" style="flex: 1;">
+                                    <button type="button" class="btn-primary" onclick="agregarImagenUrl()" style="white-space: nowrap; padding: 10px 20px;">➕ Añadir</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <small style="color: #666; margin-top: 5px; display: block;">Añade al menos una imagen. Puedes agregar varias para crear un carrusel.</small>
+
+                    <small style="color: #666; margin-top: 10px; display: block;">Añade al menos una imagen. Puedes agregar varias para crear un carrusel.</small>
                 </div>
 
                 <div class="form-group">
                     <label>Descripción</label>
                     <textarea class="form-control" id="productoDescripcion" required></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Tallas (separadas por coma)</label>
-                    <input type="text" class="form-control" id="productoTallas" placeholder="36, 37, 38, 39, 40" required>
                 </div>
 
                 <div class="form-group">
@@ -2442,120 +2651,6 @@
             }
         }
 
-        // ==================== ACTUALIZACIÓN AUTOMÁTICA ====================
-
-        async function cargarUltimaActualizacion() {
-            try {
-                const response = await fetch('/api/productos/ultima-actualizacion');
-                const data = await response.json();
-                mostrarUltimaActualizacion(data);
-            } catch (error) {
-                console.error('Error al cargar última actualización:', error);
-                document.getElementById('ultima-actualizacion-texto').textContent = 'Error al cargar';
-            }
-        }
-
-        function mostrarUltimaActualizacion(data) {
-            const displayElement = document.getElementById('ultima-actualizacion-display');
-            const textoElement = document.getElementById('ultima-actualizacion-texto');
-
-            if (!data.ultimaActualizacion || data.estado === 'nunca') {
-                textoElement.textContent = 'Nunca actualizado';
-                displayElement.style.background = '#fff3cd';
-                displayElement.style.borderLeftColor = '#ffc107';
-                return;
-            }
-
-            const fecha = new Date(data.ultimaActualizacion);
-            const ahora = new Date();
-            const diff = ahora - fecha;
-            const minutos = Math.floor(diff / 60000);
-            const horas = Math.floor(minutos / 60);
-            const dias = Math.floor(horas / 24);
-
-            let tiempoTexto;
-            if (minutos < 1) {
-                tiempoTexto = 'Hace menos de 1 minuto';
-            } else if (minutos < 60) {
-                tiempoTexto = `Hace ${minutos} minuto${minutos > 1 ? 's' : ''}`;
-            } else if (horas < 24) {
-                tiempoTexto = `Hace ${horas} hora${horas > 1 ? 's' : ''}`;
-            } else {
-                tiempoTexto = `Hace ${dias} día${dias > 1 ? 's' : ''}`;
-            }
-
-            const fechaFormateada = fecha.toLocaleString('es-ES', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-
-            if (data.estado === 'exito') {
-                textoElement.innerHTML = `
-                    <div>${tiempoTexto}</div>
-                    <div style="font-size: 0.8em; color: #666; margin-top: 3px;">${fechaFormateada}</div>
-                    <div style="font-size: 0.75em; color: #4caf50; margin-top: 3px;">✓ ${data.productosActualizados} productos actualizados</div>
-                `;
-                displayElement.style.background = '#e8f5e9';
-                displayElement.style.borderLeftColor = '#4caf50';
-            } else if (data.estado === 'error') {
-                textoElement.innerHTML = `
-                    <div>${tiempoTexto}</div>
-                    <div style="font-size: 0.8em; color: #666; margin-top: 3px;">${fechaFormateada}</div>
-                    <div style="font-size: 0.75em; color: #f44336; margin-top: 3px;">✗ Error: ${data.error || 'Desconocido'}</div>
-                `;
-                displayElement.style.background = '#ffebee';
-                displayElement.style.borderLeftColor = '#f44336';
-            } else if (data.estado === 'en_proceso') {
-                textoElement.innerHTML = `
-                    <div>Actualizando...</div>
-                    <div style="font-size: 0.8em; color: #666; margin-top: 3px;">Por favor espera</div>
-                `;
-                displayElement.style.background = '#fff3cd';
-                displayElement.style.borderLeftColor = '#ffc107';
-            }
-        }
-
-        async function forzarActualizacion() {
-            if (!confirm('¿Deseas forzar una actualización de productos ahora?')) {
-                return;
-            }
-
-            const displayElement = document.getElementById('ultima-actualizacion-display');
-            const textoElement = document.getElementById('ultima-actualizacion-texto');
-
-            textoElement.textContent = 'Actualizando...';
-            displayElement.style.background = '#fff3cd';
-            displayElement.style.borderLeftColor = '#ffc107';
-
-            try {
-                const response = await fetch('/api/productos/actualizar-ahora', {
-                    method: 'POST',
-                    credentials: 'include'
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    mostrarUltimaActualizacion(data);
-                    alert(`Actualización completada: ${data.productosActualizados} productos actualizados`);
-                    cargarProductos(); // Recargar productos en el dashboard
-                } else {
-                    throw new Error('Error en la actualización');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error al forzar actualización. Intenta de nuevo.');
-                cargarUltimaActualizacion(); // Recargar el estado
-            }
-        }
-
-        // Actualizar el display cada 30 segundos
-        setInterval(cargarUltimaActualizacion, 30000);
-
-        // ==================== FIN ACTUALIZACIÓN AUTOMÁTICA ====================
-
         // Función para obtener la ruta completa de categorías
         function obtenerRutaCategoria(nombreCategoria) {
             const categoria = categoriasData.find(c => c.nombre === nombreCategoria);
@@ -2747,7 +2842,10 @@
         }
 
         // Funciones para gestionar imágenes del producto
-        function agregarImagen() {
+        let archivosImagenes = []; // Array para almacenar archivos pendientes de subir
+
+        // Función para agregar imagen por URL
+        function agregarImagenUrl() {
             const url = document.getElementById('nuevaImagenUrl').value.trim();
             if (!url) {
                 alert('Por favor ingresa una URL de imagen válida');
@@ -2757,6 +2855,58 @@
             imagenesProducto.push(url);
             document.getElementById('nuevaImagenUrl').value = '';
             renderizarImagenes();
+        }
+
+        // Función para agregar imagen desde archivo
+        async function agregarImagenArchivo() {
+            const input = document.getElementById('nuevaImagenArchivo');
+            const file = input.files[0];
+
+            if (!file) {
+                alert('Por favor selecciona una imagen');
+                return;
+            }
+
+            // Validar que sea una imagen
+            if (!file.type.startsWith('image/')) {
+                alert('El archivo debe ser una imagen');
+                return;
+            }
+
+            // Validar tamaño (máximo 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('La imagen no debe superar los 5MB');
+                return;
+            }
+
+            // Subir la imagen al servidor
+            const formData = new FormData();
+            formData.append('imagen', file);
+
+            try {
+                const response = await fetch('/api/productos/upload-imagen', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al subir la imagen');
+                }
+
+                const data = await response.json();
+
+                // Añadir la URL de la imagen subida al array
+                imagenesProducto.push(data.url);
+
+                // Limpiar el input
+                input.value = '';
+
+                renderizarImagenes();
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al subir la imagen. Por favor intenta de nuevo.');
+            }
         }
 
         function eliminarImagen(index) {
@@ -3716,15 +3866,6 @@
             document.getElementById('productoCategoria').value = producto.categoria;
             document.getElementById('productoDescripcion').value = producto.descripcion;
 
-            // Cargar tallas (con soporte para variantes)
-            let tallasStr = '';
-            if (producto.variantes && Array.isArray(producto.variantes) && producto.variantes.length > 0) {
-                tallasStr = producto.variantes.map(v => v.talla).join(', ');
-            } else if (producto.tallas && Array.isArray(producto.tallas)) {
-                tallasStr = producto.tallas.join(', ');
-            }
-            document.getElementById('productoTallas').value = tallasStr;
-
             document.getElementById('productoNuevo').checked = producto.nuevo || false;
             document.getElementById('productoDestacado').checked = producto.destacado || false;
             document.getElementById('modalProducto').classList.add('show');
@@ -3741,8 +3882,6 @@
             }
 
             const id = document.getElementById('productoId').value;
-            const tallasInput = document.getElementById('productoTallas').value;
-            const tallas = tallasInput.split(',').map(t => t.trim());
 
             const productoData = {
                 nombre: document.getElementById('productoNombre').value,
@@ -3750,7 +3889,6 @@
                 categoria: document.getElementById('productoCategoria').value,
                 imagenes: imagenesProducto,
                 descripcion: document.getElementById('productoDescripcion').value,
-                tallas: tallas,
                 nuevo: document.getElementById('productoNuevo').checked,
                 destacado: document.getElementById('productoDestacado').checked
             };
@@ -6059,18 +6197,291 @@ Web: https://www.AcriLook.es
 
         // ==================== FIN HISTORIAL DE PUBLICACIONES ====================
 
+        // ==================== GESTIÓN DE NOTAS ====================
+
+        // Cargar notas
+        async function cargarNotas() {
+            try {
+                const response = await fetch('/api/notas', {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) throw new Error('Error al cargar notas');
+
+                const notas = await response.json();
+                mostrarNotas(notas);
+            } catch (error) {
+                console.error('Error cargando notas:', error);
+                document.getElementById('notasGrid').innerHTML = '<p style="color: #666; text-align: center; grid-column: 1/-1;">Error al cargar las notas</p>';
+            }
+        }
+
+        // Mostrar notas en el grid (ordenadas de más reciente a más antigua)
+        function mostrarNotas(notas) {
+            const grid = document.getElementById('notasGrid');
+
+            if (!notas || notas.length === 0) {
+                grid.innerHTML = '<p style="color: #666; text-align: center; grid-column: 1/-1;">No hay notas. ¡Crea tu primera nota!</p>';
+                return;
+            }
+
+            // Ordenar notas por fecha de creación, más recientes primero
+            const notasOrdenadas = [...notas].sort((a, b) => {
+                return new Date(b.fechaCreacion) - new Date(a.fechaCreacion);
+            });
+
+            grid.innerHTML = notasOrdenadas.map(nota => `
+                <div class="nota-card" style="background: ${nota.color};">
+                    <div class="nota-color-strip" style="background: ${ajustarBrillo(nota.color, -20)};"></div>
+                    <div class="nota-header">
+                        <h3 class="nota-titulo">${escapeHtml(nota.titulo)}</h3>
+                        <div class="nota-acciones">
+                            <button class="nota-btn" onclick="editarNota(${nota.id})" title="Editar">✏️</button>
+                            <button class="nota-btn" onclick="eliminarNota(${nota.id})" title="Eliminar">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="nota-contenido">${escapeHtml(nota.contenido)}</div>
+                    <div class="nota-fecha">${formatearFecha(nota.fechaCreacion)}</div>
+                </div>
+            `).join('');
+        }
+
+        // Mostrar formulario de nueva nota
+        function mostrarFormularioNota() {
+            document.getElementById('notas').style.display = 'none';
+            document.getElementById('notasFormulario').style.display = 'block';
+            document.getElementById('tituloFormularioNota').textContent = '✏️ Nueva Nota';
+
+            // Resetear formulario
+            const form = document.getElementById('formNota');
+            form.reset();
+            form.onsubmit = guardarNota;
+
+            const boton = form.querySelector('button[type="submit"]');
+            boton.textContent = '💾 Guardar Nota';
+            boton.style.background = '';
+
+            // Ocultar botón cancelar
+            const btnCancelar = document.querySelector('.btn-cancelar-nota');
+            if (btnCancelar) btnCancelar.style.display = 'none';
+
+            document.querySelector('input[name="notaColor"][value="#fef08a"]').checked = true;
+        }
+
+        // Volver a la lista de notas
+        function volverANotas() {
+            document.getElementById('notasFormulario').style.display = 'none';
+            document.getElementById('notas').style.display = 'block';
+
+            // Resetear formulario
+            const form = document.getElementById('formNota');
+            form.reset();
+            form.onsubmit = guardarNota;
+
+            const boton = form.querySelector('button[type="submit"]');
+            boton.textContent = '💾 Guardar Nota';
+            boton.style.background = '';
+
+            document.querySelector('input[name="notaColor"][value="#fef08a"]').checked = true;
+        }
+
+        // Guardar nota
+        async function guardarNota(event) {
+            event.preventDefault();
+
+            const titulo = document.getElementById('notaTitulo').value;
+            const contenido = document.getElementById('notaContenido').value;
+            const color = document.querySelector('input[name="notaColor"]:checked').value;
+
+            try {
+                const response = await fetch('/api/notas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ titulo, contenido, color })
+                });
+
+                if (!response.ok) throw new Error('Error al guardar nota');
+
+                // Recargar notas
+                await cargarNotas();
+
+                // Volver a la lista
+                volverANotas();
+
+                mostrarMensaje('✅ Nota guardada correctamente', 'success');
+            } catch (error) {
+                console.error('Error guardando nota:', error);
+                mostrarMensaje('❌ Error al guardar la nota', 'error');
+            }
+        }
+
+        // Editar nota
+        async function editarNota(id) {
+            try {
+                const response = await fetch(`/api/notas/${id}`, {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) throw new Error('Error al obtener nota');
+
+                const nota = await response.json();
+
+                // Mostrar formulario
+                document.getElementById('notas').style.display = 'none';
+                document.getElementById('notasFormulario').style.display = 'block';
+                document.getElementById('tituloFormularioNota').textContent = '✏️ Editar Nota';
+
+                // Llenar formulario
+                document.getElementById('notaTitulo').value = nota.titulo;
+                document.getElementById('notaContenido').value = nota.contenido;
+                document.querySelector(`input[name="notaColor"][value="${nota.color}"]`).checked = true;
+
+                // Cambiar el botón del formulario
+                const form = document.getElementById('formNota');
+                form.onsubmit = async (e) => {
+                    e.preventDefault();
+                    await actualizarNota(id);
+                };
+
+                const boton = form.querySelector('button[type="submit"]');
+                boton.textContent = '💾 Actualizar Nota';
+                boton.style.background = '#f59e0b';
+
+                // Mostrar botón cancelar
+                const btnCancelar = document.querySelector('.btn-cancelar-nota');
+                if (btnCancelar) btnCancelar.style.display = 'block';
+
+                // Scroll arriba
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (error) {
+                console.error('Error editando nota:', error);
+                mostrarMensaje('❌ Error al cargar la nota', 'error');
+            }
+        }
+
+        // Actualizar nota
+        async function actualizarNota(id) {
+            const titulo = document.getElementById('notaTitulo').value;
+            const contenido = document.getElementById('notaContenido').value;
+            const color = document.querySelector('input[name="notaColor"]:checked').value;
+
+            try {
+                const response = await fetch(`/api/notas/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ titulo, contenido, color })
+                });
+
+                if (!response.ok) throw new Error('Error al actualizar nota');
+
+                // Recargar notas
+                await cargarNotas();
+
+                // Volver a la lista
+                volverANotas();
+
+                mostrarMensaje('✅ Nota actualizada correctamente', 'success');
+            } catch (error) {
+                console.error('Error actualizando nota:', error);
+                mostrarMensaje('❌ Error al actualizar la nota', 'error');
+            }
+        }
+
+        // Eliminar nota
+        async function eliminarNota(id) {
+            if (!confirm('¿Estás seguro de eliminar esta nota?')) return;
+
+            try {
+                const response = await fetch(`/api/notas/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) throw new Error('Error al eliminar nota');
+
+                await cargarNotas();
+                mostrarMensaje('✅ Nota eliminada correctamente', 'success');
+            } catch (error) {
+                console.error('Error eliminando nota:', error);
+                mostrarMensaje('❌ Error al eliminar la nota', 'error');
+            }
+        }
+
+        // Utilidades
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function ajustarBrillo(hexColor, percent) {
+            const num = parseInt(hexColor.replace('#', ''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                (B < 255 ? B < 1 ? 0 : B : 255))
+                .toString(16).slice(1);
+        }
+
+        function formatearFecha(fecha) {
+            const date = new Date(fecha);
+            const ahora = new Date();
+            const diff = ahora - date;
+            const minutos = Math.floor(diff / 60000);
+            const horas = Math.floor(diff / 3600000);
+            const dias = Math.floor(diff / 86400000);
+
+            if (minutos < 1) return 'Ahora';
+            if (minutos < 60) return `Hace ${minutos} min`;
+            if (horas < 24) return `Hace ${horas} h`;
+            if (dias < 7) return `Hace ${dias} días`;
+
+            return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function mostrarMensaje(texto, tipo) {
+            const alerta = document.createElement('div');
+            alerta.textContent = texto;
+            alerta.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                border-radius: 8px;
+                background: ${tipo === 'success' ? '#10b981' : '#ef4444'};
+                color: white;
+                font-weight: 600;
+                z-index: 10000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                animation: slideIn 0.3s ease;
+            `;
+
+            document.body.appendChild(alerta);
+            setTimeout(() => {
+                alerta.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => alerta.remove(), 300);
+            }, 3000);
+        }
+
+        // ==================== FIN GESTIÓN DE NOTAS ====================
+
         // Verificar sesión y cargar datos al inicio
         (async () => {
             const sesionValida = await verificarSesion();
             if (sesionValida) {
                 cargarPedidos();
                 cargarProductos();
-                cargarUltimaActualizacion();
                 cargarDescuentos();
                 cargarClientes();
                 cargarTickets();
                 cargarUltimosPedidosDashboard();
                 cargarUltimosProductosDashboard();
+                cargarNotas(); // Cargar notas
                 // Auto-actualizar cada 30 segundos
                 setInterval(() => {
                     cargarPedidos();

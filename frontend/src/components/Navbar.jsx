@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { obtenerProductos } from '../services/api';
+import Logo from './Logo';
 import '../styles/Navbar.css';
 
 const Navbar = ({ onOpenLogin, onOpenProfile, onOpenContact, onOpenAdminDescuentos, onOpenAdminAnalytics, onOpenAdminMarketingRRSS }) => {
@@ -16,6 +17,7 @@ const Navbar = ({ onOpenLogin, onOpenProfile, onOpenContact, onOpenAdminDescuent
   const [showAdminMenu, setShowAdminMenu] = useState(false);
   const [menuTimeout, setMenuTimeout] = useState(null);
   const [adminMenuTimeout, setAdminMenuTimeout] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -117,7 +119,7 @@ const Navbar = ({ onOpenLogin, onOpenProfile, onOpenContact, onOpenAdminDescuent
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
         <div className="navbar-container">
           <div className="navbar-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-            <h1>Shoe<span className="logo-dot">·</span>Landia</h1>
+            <Logo variant="default" size="medium" />
           </div>
 
           <div className="navbar-links">
@@ -176,7 +178,6 @@ const Navbar = ({ onOpenLogin, onOpenProfile, onOpenContact, onOpenAdminDescuent
             </div>
 
             <a href="#about" onClick={(e) => { e.preventDefault(); handleNavClick('about'); }}>Sobre Nosotros</a>
-            <a href="/vans-custom" onClick={(e) => { e.preventDefault(); navigate('/vans-custom'); }} className="vans-custom-link">Personaliza tus Vans</a>
             <a href="#contact" onClick={(e) => { e.preventDefault(); onOpenContact(); }}>Contacto</a>
             {isAuthenticated && user?.rol === 'admin' && (
               <div
@@ -291,8 +292,133 @@ const Navbar = ({ onOpenLogin, onOpenProfile, onOpenContact, onOpenAdminDescuent
                 <span className="cart-badge">{getCartCount()}</span>
               )}
             </div>
+
+            <button
+              className={`mobile-menu-btn ${mobileMenuOpen ? 'open' : ''}`}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+          <div className="mobile-menu-content">
+            <a href="#home" onClick={(e) => { e.preventDefault(); handleNavClick('home'); setMobileMenuOpen(false); }}>Inicio</a>
+
+            <div className="mobile-menu-section">
+              <button
+                className="mobile-menu-section-title"
+                onClick={() => setShowProductsMenu(!showProductsMenu)}
+              >
+                Productos
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className={`mobile-dropdown-arrow ${showProductsMenu ? 'open' : ''}`}
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              {showProductsMenu && (
+                <div className="mobile-submenu">
+                  {categorias.map((categoria, index) => (
+                    <a
+                      key={index}
+                      href={`/categoria/${categoria}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate(`/categoria/${categoria}`);
+                        setMobileMenuOpen(false);
+                        setShowProductsMenu(false);
+                      }}
+                    >
+                      {formatearNombreCategoria(categoria)}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <a href="#about" onClick={(e) => { e.preventDefault(); handleNavClick('about'); setMobileMenuOpen(false); }}>Sobre Nosotros</a>
+            <a href="#contact" onClick={(e) => { e.preventDefault(); onOpenContact(); setMobileMenuOpen(false); }}>Contacto</a>
+
+            {isAuthenticated && user?.rol === 'admin' && (
+              <div className="mobile-menu-section">
+                <button
+                  className="mobile-menu-section-title"
+                  onClick={() => setShowAdminMenu(!showAdminMenu)}
+                >
+                  Admin
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className={`mobile-dropdown-arrow ${showAdminMenu ? 'open' : ''}`}
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+                {showAdminMenu && (
+                  <div className="mobile-submenu">
+                    <a
+                      href="#admin-descuentos"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onOpenAdminDescuentos();
+                        setMobileMenuOpen(false);
+                        setShowAdminMenu(false);
+                      }}
+                    >
+                      Descuentos
+                    </a>
+                    <a
+                      href="#admin-analytics"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onOpenAdminAnalytics();
+                        setMobileMenuOpen(false);
+                        setShowAdminMenu(false);
+                      }}
+                    >
+                      Analíticas
+                    </a>
+                    <a
+                      href="#admin-marketing-rrss"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onOpenAdminMarketingRRSS();
+                        setMobileMenuOpen(false);
+                        setShowAdminMenu(false);
+                      }}
+                    >
+                      Marketing RRSS
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile menu overlay */}
+        {mobileMenuOpen && (
+          <div
+            className="mobile-menu-overlay"
+            onClick={() => setMobileMenuOpen(false)}
+          ></div>
+        )}
       </nav>
     </>
   );

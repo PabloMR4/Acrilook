@@ -1,4 +1,5 @@
 import React from 'react';
+import Logo from './Logo';
 import '../styles/Footer.css';
 
 const Footer = () => {
@@ -7,14 +8,11 @@ const Footer = () => {
       <div className="footer-content">
         {/* Logo y descripción */}
         <div className="footer-section footer-brand">
-          <div className="footer-logo">
-            <span className="logo-icon">✨</span>
-            <h2 className="logo-text">AcriLook</h2>
-          </div>
-          <p className="footer-tagline">Tu tienda de Productos Acrílicos Online al mejor precio</p>
+          <Logo variant="full" size="large" />
+          <p className="footer-tagline">Tu tienda de Pendientes Acrílicos Online</p>
           <p className="footer-description">
-            Descubre la mejor selección de productos acrílicos premium para decoración y organización.
-            Elegancia, funcionalidad y diseño en cada pieza.
+            Descubre nuestra exclusiva colección de pendientes acrílicos artesanales.
+            Diseños únicos, ligeros y modernos para lucir con estilo en cualquier ocasión.
           </p>
           <div className="footer-social">
             <a href="#" className="social-link" aria-label="Instagram">
@@ -38,7 +36,7 @@ const Footer = () => {
           <ul className="footer-list">
             <li>
               <span className="footer-icon">📧</span>
-              <a href="mailto:info@acrilook.com">info@acrilook.com</a>
+              <a href="mailto:info@acrilook.es">info@acrilook.es</a>
             </li>
           </ul>
         </div>

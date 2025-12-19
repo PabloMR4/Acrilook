@@ -6,7 +6,10 @@ import CategoryPage from './components/CategoryPage';
 import VansCustomization from './components/VansCustomization';
 import Cart from './components/Cart';
 import Checkout from './components/Checkout';
+import Newsletter from './components/Newsletter';
 import Footer from './components/Footer';
+import FloatingHelp from './components/FloatingHelp';
+import CookieConsent from './components/CookieConsent';
 import Login from './components/Login';
 import Register from './components/Register';
 import UserProfile from './components/UserProfile';
@@ -128,7 +131,10 @@ function App() {
       {showAdminDescuentos && <AdminDescuentos onClose={handleCloseAdminDescuentos} />}
       {showAdminAnalytics && <AdminAnalytics onClose={handleCloseAdminAnalytics} />}
       {showAdminMarketingRRSS && <AdminMarketingRRSS onClose={handleCloseAdminMarketingRRSS} />}
+      <Newsletter />
       <Footer />
+      <FloatingHelp />
+      <CookieConsent />
     </div>
   );
 }

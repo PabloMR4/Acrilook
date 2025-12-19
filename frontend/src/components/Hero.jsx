@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Acrispin from './Acrispin';
 import '../styles/Hero.css';
 
 const Hero = () => {
@@ -31,12 +30,11 @@ const Hero = () => {
 
       <div className="hero-grid">
         <div className={`hero-content ${visible ? 'visible' : ''}`}>
-          {/* Badge con Acrispin */}
+          {/* Badge superior */}
           <div className="hero-tag">
-            <Acrispin size="small" animated={true} />
             <span className="tag-text">
               <span className="tag-emoji">✨</span>
-              Colección 2025 - Gana Acrispins
+              Colección 2025 - Gana Puntos
             </span>
           </div>
 
@@ -103,18 +101,13 @@ const Hero = () => {
         {/* Visual mejorado con galería de productos */}
         <div className="hero-visual">
           <div className="hero-gallery">
-            {/* Tarjeta principal con Acrispin */}
+            {/* Tarjeta principal */}
             <div className="gallery-card main-card">
               <div className="card-glow"></div>
               <div className="card-content-new">
-                <Acrispin
-                  reaction="excited"
-                  size="xlarge"
-                  animated={true}
-                  showDialogue={true}
-                  dialogueMessage="¡Descubre diseños únicos! 💜✨"
-                  dialogueAutoChange={false}
-                />
+                <div className="main-card-icon">💜</div>
+                <h3 className="main-card-title">AcriLook</h3>
+                <p className="main-card-subtitle">Diseños Únicos</p>
                 <div className="card-badge">Nuevo</div>
               </div>
             </div>

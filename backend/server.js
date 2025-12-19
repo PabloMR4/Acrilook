@@ -1423,9 +1423,9 @@ app.get('/api/admin/clientes', requireAuth, (req, res) => {
 
 // ==================== RUTAS DE STRIPE ====================
 
-// Crear Payment Intent
+// Crear Payment Intent (soporta Stripe Card y Klarna)
 app.post('/api/stripe/create-payment-intent', async (req, res) => {
-  const { amount, currency = 'eur' } = req.body;
+  const { amount, currency = 'eur', paymentMethodTypes = ['card', 'klarna'] } = req.body;
 
   if (!amount || amount <= 0) {
     return res.status(400).json({ error: 'Monto inválido' });
@@ -1435,8 +1435,10 @@ app.post('/api/stripe/create-payment-intent', async (req, res) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount * 100), // Stripe espera el monto en centavos
       currency: currency,
+      payment_method_types: paymentMethodTypes,
       automatic_payment_methods: {
         enabled: true,
+        allow_redirects: 'always' // Necesario para Klarna
       },
     });
 
@@ -1570,6 +1572,117 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
     console.error('Error procesando evento de webhook:', err);
     res.status(500).json({ error: 'Error procesando webhook' });
   }
+});
+
+// ==================== RUTAS DE PAYPAL ====================
+
+// Nota: PayPal está temporalmente deshabilitado hasta configurar las credenciales
+// Para activarlo, descomenta este código y configura PAYPAL_CLIENT_ID y PAYPAL_CLIENT_SECRET en .env
+
+// Configurar PayPal SDK
+// const paypal = require('@paypal/paypal-server-sdk');
+//
+// // Inicializar cliente de PayPal
+// const paypalClient = paypal.client({
+//   environment: process.env.PAYPAL_MODE === 'live' ? paypal.core.LiveEnvironment : paypal.core.SandboxEnvironment,
+//   auth: {
+//     clientId: process.env.PAYPAL_CLIENT_ID || '',
+//     clientSecret: process.env.PAYPAL_CLIENT_SECRET || ''
+//   }
+// });
+
+// Crear orden de PayPal
+app.post('/api/paypal/create-order', async (req, res) => {
+  // PayPal temporalmente deshabilitado
+  return res.status(503).json({
+    error: 'PayPal no está disponible. Por favor, usa otro método de pago o contacta con soporte.'
+  });
+
+  /* Código comentado hasta configurar PayPal
+  const { amount, currency = 'EUR' } = req.body;
+
+  if (!amount || amount <= 0) {
+    return res.status(400).json({ error: 'Monto inválido' });
+  }
+
+  if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
+    return res.status(500).json({
+      error: 'PayPal no está configurado. Por favor, configura PAYPAL_CLIENT_ID y PAYPAL_CLIENT_SECRET en el archivo .env'
+    });
+  }
+
+  try {
+    const request = {
+      intent: 'CAPTURE',
+      purchase_units: [{
+        amount: {
+          currency_code: currency,
+          value: amount.toFixed(2)
+        }
+      }]
+    };
+
+    // Crear la orden en PayPal
+    const order = await paypalClient.orders.create(request);
+
+    res.json({
+      orderID: order.id
+    });
+  } catch (error) {
+    console.error('Error creando orden de PayPal:', error);
+    res.status(500).json({ error: error.message });
+  }
+  */
+});
+
+// Capturar pago de PayPal
+app.post('/api/paypal/capture-order', async (req, res) => {
+  // PayPal temporalmente deshabilitado
+  return res.status(503).json({
+    error: 'PayPal no está disponible.'
+  });
+
+  /* Código comentado hasta configurar PayPal
+  const { orderID } = req.body;
+
+  if (!orderID) {
+    return res.status(400).json({ error: 'Order ID requerido' });
+  }
+
+  try {
+    const capture = await paypalClient.orders.capture(orderID);
+
+    res.json({
+      success: true,
+      orderID: capture.id,
+      status: capture.status,
+      payerEmail: capture.payer?.email_address,
+      amount: capture.purchase_units[0].amount
+    });
+  } catch (error) {
+    console.error('Error capturando orden de PayPal:', error);
+    res.status(500).json({ error: error.message });
+  }
+  */
+});
+
+// Obtener configuración de PayPal
+app.get('/api/paypal/config', (req, res) => {
+  // PayPal temporalmente deshabilitado
+  return res.status(503).json({
+    error: 'PayPal no está configurado.'
+  });
+
+  /* Código comentado hasta configurar PayPal
+  if (!process.env.PAYPAL_CLIENT_ID) {
+    return res.status(500).json({
+      error: 'PayPal no está configurado. Por favor, configura PAYPAL_CLIENT_ID en el archivo .env'
+    });
+  }
+  res.json({
+    clientId: process.env.PAYPAL_CLIENT_ID
+  });
+  */
 });
 
 // Rutas de administración
@@ -1721,7 +1834,7 @@ app.get('/api/productos/:id', (req, res) => {
 
 // Crear un nuevo pedido
 app.post('/api/pedidos', (req, res) => {
-  const { items, total, cliente, paymentIntentId } = req.body;
+  const { items, total, cliente, paymentIntentId, paypalOrderId, paymentMethod } = req.body;
 
   // Trackear descuentos usados y actualizar contadores
   const descuentosUsados = new Set();
@@ -1756,14 +1869,16 @@ app.post('/api/pedidos', (req, res) => {
     total,
     cliente,
     clienteId: clienteIdAsociado, // Asociar con cliente autenticado o encontrado por email
+    paymentMethod: paymentMethod || 'stripe', // stripe, paypal, klarna
     paymentIntentId: paymentIntentId || null, // ID del pago de Stripe
+    paypalOrderId: paypalOrderId || null, // ID de la orden de PayPal
     fecha: new Date().toISOString(),
     estado: 'Nuevo Pedido',
     descuentosAplicados: Array.from(descuentosUsados),
     // Campos de estado de pago
-    pagado: false, // Se marcará como true cuando el webhook confirme el pago
-    estadoPago: 'pending', // pending, succeeded, failed, canceled
-    fechaPago: null
+    pagado: paymentMethod === 'paypal' ? true : false, // PayPal se confirma antes de crear el pedido
+    estadoPago: paymentMethod === 'paypal' ? 'succeeded' : 'pending', // pending, succeeded, failed, canceled
+    fechaPago: paymentMethod === 'paypal' ? new Date().toISOString() : null
   };
 
   pedidos.push(nuevoPedido);

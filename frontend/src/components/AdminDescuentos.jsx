@@ -6,6 +6,7 @@ const AdminDescuentos = ({ onClose }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modoEdicion, setModoEdicion] = useState(false);
+  const [vistaActual, setVistaActual] = useState('general'); // 'general' o 'newsletter'
   const [descuentoActual, setDescuentoActual] = useState({
     nombre: '',
     porcentaje: 0,
@@ -136,6 +137,11 @@ const AdminDescuentos = ({ onClose }) => {
     setMensaje({ texto: '', tipo: '' });
   };
 
+  // Filtrar descuentos según la vista actual
+  const descuentosFiltrados = vistaActual === 'newsletter'
+    ? descuentos.filter(d => d.tipo === 'newsletter')
+    : descuentos.filter(d => d.tipo !== 'newsletter');
+
   if (loading) {
     return (
       <div className="admin-descuentos-overlay">
@@ -164,8 +170,27 @@ const AdminDescuentos = ({ onClose }) => {
 
         {error && <div className="mensaje error">{error}</div>}
 
+        {/* Pestañas */}
+        <div className="tabs-container">
+          <button
+            className={`tab-btn ${vistaActual === 'general' ? 'active' : ''}`}
+            onClick={() => setVistaActual('general')}
+          >
+            Descuentos Generales
+            <span className="tab-badge">{descuentos.filter(d => d.tipo !== 'newsletter').length}</span>
+          </button>
+          <button
+            className={`tab-btn ${vistaActual === 'newsletter' ? 'active' : ''}`}
+            onClick={() => setVistaActual('newsletter')}
+          >
+            Descuentos por Suscripción
+            <span className="tab-badge">{descuentos.filter(d => d.tipo === 'newsletter').length}</span>
+          </button>
+        </div>
+
         <div className="admin-content">
-          {/* Formulario */}
+          {/* Formulario - Solo visible en vista general */}
+          {vistaActual === 'general' && (
           <div className="formulario-seccion">
             <h3>{modoEdicion ? 'Editar Descuento' : 'Nuevo Descuento'}</h3>
             <form onSubmit={handleSubmit}>
@@ -331,22 +356,43 @@ const AdminDescuentos = ({ onClose }) => {
               </div>
             </form>
           </div>
+          )}
 
           {/* Lista de descuentos */}
           <div className="lista-seccion">
-            <h3>Descuentos Existentes</h3>
+            <h3>
+              {vistaActual === 'newsletter'
+                ? 'Descuentos por Suscripción al Newsletter'
+                : 'Descuentos Existentes'}
+            </h3>
+            {vistaActual === 'newsletter' && (
+              <p className="info-text">
+                Los descuentos por suscripción se generan automáticamente cuando un usuario se suscribe al newsletter.
+                Cada código es único y válido para la primera compra del suscriptor.
+              </p>
+            )}
             <div className="descuentos-lista">
-              {descuentos.length === 0 ? (
-                <p>No hay descuentos creados</p>
+              {descuentosFiltrados.length === 0 ? (
+                <p>No hay descuentos {vistaActual === 'newsletter' ? 'por suscripción' : 'creados'}</p>
               ) : (
-                descuentos.map((desc) => (
-                  <div key={desc.id} className={`descuento-card ${!desc.activo ? 'inactivo' : ''}`}>
+                descuentosFiltrados.map((desc) => (
+                  <div key={desc.id} className={`descuento-card ${!desc.activo ? 'inactivo' : ''} ${desc.tipo === 'newsletter' ? 'newsletter' : ''}`}>
                     <div className="descuento-info">
                       <h4>{desc.nombre}</h4>
+                      {desc.tipo === 'newsletter' && desc.email && (
+                        <div className="email-info">
+                          <span className="email-icon">📧</span>
+                          <span className="email-text">{desc.email}</span>
+                        </div>
+                      )}
                       <div className="descuento-detalles">
-                        <span className={`badge ${desc.tipoCodigo === 'promocional' ? 'promocional' : 'general'}`}>
-                          {desc.tipoCodigo === 'promocional' ? 'Código Promocional' : 'Descuento General'}
-                        </span>
+                        {desc.tipo === 'newsletter' ? (
+                          <span className="badge newsletter">Newsletter</span>
+                        ) : (
+                          <span className={`badge ${desc.tipoCodigo === 'promocional' ? 'promocional' : 'general'}`}>
+                            {desc.tipoCodigo === 'promocional' ? 'Código Promocional' : 'Descuento General'}
+                          </span>
+                        )}
                         {desc.codigo && <span className="codigo">Código: {desc.codigo}</span>}
                         {desc.tipoBeneficioGlobal === 'porcentaje' ? (
                           <span className="valor">{desc.porcentaje}% descuento</span>
@@ -356,18 +402,24 @@ const AdminDescuentos = ({ onClose }) => {
                         {desc.montoMinimo > 0 && (
                           <span className="monto-min">Mínimo: €{desc.montoMinimo}</span>
                         )}
-                        <span className="usos">Usado {desc.vecesUsado || 0} veces</span>
+                        <span className={`usos ${desc.vecesUsado > 0 ? 'usado' : ''}`}>
+                          {desc.vecesUsado > 0 ? '✅ Usado' : '⏳ Sin usar'} ({desc.vecesUsado || 0} {desc.vecesUsado === 1 ? 'vez' : 'veces'})
+                        </span>
                       </div>
-                      {desc.fechaInicio && desc.fechaFin && (
+                      {desc.fechaInicio && (
                         <div className="fechas">
-                          {new Date(desc.fechaInicio).toLocaleDateString()} - {new Date(desc.fechaFin).toLocaleDateString()}
+                          <span className="fecha-creacion">
+                            Creado: {new Date(desc.fechaInicio).toLocaleDateString()} {new Date(desc.fechaInicio).toLocaleTimeString()}
+                          </span>
                         </div>
                       )}
                     </div>
                     <div className="descuento-acciones">
-                      <button className="btn-edit" onClick={() => handleEditar(desc)}>
-                        Editar
-                      </button>
+                      {desc.tipo !== 'newsletter' && (
+                        <button className="btn-edit" onClick={() => handleEditar(desc)}>
+                          Editar
+                        </button>
+                      )}
                       <button className="btn-delete" onClick={() => handleEliminar(desc.id)}>
                         Eliminar
                       </button>

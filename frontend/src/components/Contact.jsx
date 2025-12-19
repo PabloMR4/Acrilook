@@ -74,7 +74,7 @@ const Contact = ({ onClose }) => {
             <span className="contact-icon">📧</span>
             <div>
               <strong>Email</strong>
-              <p>info@acrilook.com</p>
+              <p>info@acrilook.es</p>
             </div>
           </div>
         </div>

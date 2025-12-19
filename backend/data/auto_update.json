@@ -1,6 +1,6 @@
 {
-  "ultimaActualizacion": "2025-11-03T19:00:16.201Z",
-  "estado": "exito",
+  "ultimaActualizacion": "2025-12-19T01:00:00.311Z",
+  "estado": "error",
   "productosActualizados": 0,
-  "error": null
+  "error": "Request failed with status code 404"
 }

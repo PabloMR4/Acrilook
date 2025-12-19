@@ -2,20 +2,26 @@
   "usuarios": [
     {
       "id": 1,
-      "nombre": "Pablo Martinez Ruiz",
+      "nombre": "Pablo Martínez Ruiz",
       "email": "pablo.martinezruiz@protonmail.com",
       "password": "$2b$10$A2DLB3yrxG1OKagbYddjUuBabo8mw/LGsNsmh8di8s7BePrhcLdUK",
       "telefono": "606297102",
-      "direccion": "",
-      "ciudad": "",
-      "provincia": "",
-      "codigoPostal": "",
+      "direccion": "Ramon de campoamor 6 4D",
+      "ciudad": "Hellin",
+      "provincia": "Albacete",
+      "codigoPostal": "02400",
       "fechaRegistro": "2025-10-19T23:54:08.848Z",
       "pedidos": [
         5,
         9,
         14
-      ]
+      ],
+      "puntos": 0,
+      "puntosHistorial": [],
+      "nivel": "Bronce",
+      "totalGastado": 0,
+      "recompensasCanjeadas": [],
+      "descuentoActual": 0
     },
     {
       "id": 2,
@@ -46,7 +52,20 @@
       "pedidos": [
         10
       ]
+    },
+    {
+      "id": 4,
+      "nombre": "Prueba Martinez",
+      "email": "pablo@pablo.es",
+      "password": "$2b$10$cGOjGGlEUaHtCmvcDP7gdOcO/1TvM8ejdr2HBTnNfFfZk729ZXWTa",
+      "telefono": "606297102",
+      "direccion": "",
+      "ciudad": "",
+      "provincia": "",
+      "codigoPostal": "",
+      "fechaRegistro": "2025-11-28T19:41:51.662Z",
+      "pedidos": []
     }
   ],
-  "counter": 4
+  "counter": 5
 }

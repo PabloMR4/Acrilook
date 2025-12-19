@@ -1,0 +1,60 @@
+.floating-acrispins-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.floating-acrispin {
+  position: absolute;
+  bottom: -100px;
+  animation: floatUp linear infinite;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+@keyframes floatUp {
+  0% {
+    bottom: -100px;
+    opacity: 0;
+    transform: translateX(0) rotate(0deg) scale(1);
+  }
+  10% {
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateX(20px) rotate(180deg) scale(1.1);
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    bottom: 120%;
+    opacity: 0;
+    transform: translateX(-20px) rotate(360deg) scale(0.8);
+  }
+}
+
+/* Efecto de brillo suave en los Acrispins flotantes */
+.floating-acrispin:nth-child(odd) {
+  animation-timing-function: ease-in-out;
+}
+
+.floating-acrispin:nth-child(even) {
+  animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* En móviles, reducir la cantidad y hacerlos más sutiles */
+@media (max-width: 768px) {
+  .floating-acrispin {
+    opacity: 0.2;
+  }
+
+  .floating-acrispin:nth-child(n+3) {
+    display: none;
+  }
+}

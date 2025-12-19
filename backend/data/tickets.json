@@ -1,4 +1,117 @@
 {
-  "tickets": [],
-  "counter": 4
+  "tickets": [
+    {
+      "id": 4,
+      "nombre": "Prueba Martinez",
+      "email": "pablo@pablo.es",
+      "asunto": "ERROR PEDIDO",
+      "estado": "Cerrado",
+      "prioridad": "Urgente",
+      "clienteId": 4,
+      "pedidoId": null,
+      "pedido": null,
+      "fechaCreacion": "2025-11-28T19:42:17.989Z",
+      "fechaActualizacion": "2025-11-28T20:00:28.133Z",
+      "archivos": [],
+      "mensajes": [
+        {
+          "id": 1,
+          "autor": "Prueba Martinez",
+          "tipo": "cliente",
+          "mensaje": "HOLA\r\nHOLA\r\nHOLA\r\nHOLA\r\nHOLA\r\nHOLA\r\n",
+          "archivos": [],
+          "fecha": "2025-11-28T19:42:17.989Z"
+        },
+        {
+          "id": 2,
+          "autor": "Soporte",
+          "tipo": "admin",
+          "mensaje": "Buenas Pablo.\n\nSentimos el problema que esta teniendo con el producto.\n\nVamos a intentar darle una solucion urgente.\n\nSaludos.",
+          "archivos": [],
+          "fecha": "2025-11-28T19:43:08.108Z"
+        },
+        {
+          "id": 3,
+          "autor": "Soporte",
+          "tipo": "admin",
+          "mensaje": "Muchas gracias!",
+          "archivos": [],
+          "fecha": "2025-11-28T19:43:31.047Z"
+        },
+        {
+          "id": 4,
+          "autor": "Soporte",
+          "tipo": "admin",
+          "mensaje": "Vale",
+          "archivos": [],
+          "fecha": "2025-11-28T19:59:25.668Z"
+        },
+        {
+          "id": 5,
+          "autor": "Soporte",
+          "tipo": "admin",
+          "mensaje": "a",
+          "archivos": [],
+          "fecha": "2025-11-28T19:59:36.939Z"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "nombre": "Pablo Martínez Ruiz",
+      "email": "pablo.martinezruiz@protonmail.com",
+      "asunto": "PRUEBA PABLO",
+      "estado": "En Proceso",
+      "prioridad": "Media",
+      "clienteId": 1,
+      "pedidoId": null,
+      "pedido": null,
+      "fechaCreacion": "2025-12-13T01:05:06.480Z",
+      "fechaActualizacion": "2025-12-13T01:09:57.112Z",
+      "archivos": [],
+      "mensajes": [
+        {
+          "id": 1,
+          "autor": "Pablo Martínez Ruiz",
+          "tipo": "cliente",
+          "mensaje": "AAAAAAAAAA",
+          "archivos": [],
+          "fecha": "2025-12-13T01:05:06.480Z"
+        },
+        {
+          "id": 2,
+          "autor": "Soporte",
+          "tipo": "admin",
+          "mensaje": "Gracias Pablo.\n\nLo revisamos.\n\nSaludos.",
+          "archivos": [],
+          "fecha": "2025-12-13T01:05:50.726Z"
+        },
+        {
+          "id": 3,
+          "autor": "Soporte",
+          "tipo": "admin",
+          "mensaje": "Gracias!.",
+          "archivos": [],
+          "fecha": "2025-12-13T01:06:04.685Z"
+        },
+        {
+          "id": 4,
+          "autor": "Pablo Martínez Ruiz",
+          "tipo": "cliente",
+          "mensaje": "Gracias!",
+          "archivos": [],
+          "fecha": "2025-12-13T01:08:54.844Z"
+        },
+        {
+          "id": 5,
+          "autor": "Soporte",
+          "tipo": "admin",
+          "mensaje": "Gracais a ti.",
+          "archivos": [],
+          "fecha": "2025-12-13T01:09:57.112Z"
+        }
+      ]
+    }
+  ],
+  "counter": 6
 }
